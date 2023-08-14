@@ -1,0 +1,3 @@
+[submodule "src/music-api"]
+	path = src/music-api
+	url = https://github.com/mi-saka10032/music-api
