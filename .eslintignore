@@ -2,6 +2,7 @@ public
 dist
 *.d.ts
 /src/assets
+/src/music-api
 package.json
 .eslintrc.js
 .prettierrc.js

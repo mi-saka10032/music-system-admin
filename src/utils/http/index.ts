@@ -13,8 +13,14 @@ import { stringify } from "qs";
 import NProgress from "../progress";
 import { getToken, formatToken } from "@/utils/auth";
 
-// 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
+import router from "@/router";
+import SystemResponse from "@/music-api/code/SystemResponse";
+import { ErrorCode } from "@/music-api/code/ErrorCode";
+import { message } from "@/utils/message";
+
+// 相关配置请参考：http://www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
+  baseURL: "/api",
   // 请求超时时间
   timeout: 10000,
   headers: {
@@ -97,8 +103,23 @@ class PureHttp {
     instance.interceptors.response.use(
       (response: PureHttpResponse) => {
         const $config = response.config;
+        // 判断响应数据code
+        const systemResponse: SystemResponse = response.data;
+        if (!systemResponse) {
+          return Promise.reject("服务器响应数据格式不正确，请检查服务器配置");
+        }
+        const { code, msg } = systemResponse;
+        // code非OK状态下，返回错误信息
+        if (code !== ErrorCode.OK) {
+          if (code === ErrorCode.LOGIN_ERROR) {
+            router.replace("/login");
+          }
+          message(msg);
+          return Promise.reject(msg);
+        }
         // 关闭进度条动画
         NProgress.done();
+        // 正常返回数据
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
         if (typeof $config.beforeResponseCallback === "function") {
           $config.beforeResponseCallback(response);

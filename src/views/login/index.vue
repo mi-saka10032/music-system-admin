@@ -17,6 +17,8 @@ import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
+import SystemResponse from "@/music-api/code/SystemResponse";
+import { LoginVO } from "@/music-api/vo/LoginVO";
 
 defineOptions({
   name: "Login"
@@ -33,8 +35,8 @@ dataThemeChange();
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123"
+  username: "misaka10032",
+  password: "123456abc"
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -43,9 +45,9 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
-        .then(res => {
-          if (res.success) {
+        .loginByUsername({ username: ruleForm.username, password: "123456" })
+        .then((res: SystemResponse<LoginVO>) => {
+          if (res.data?.accessToken) {
             // 获取后端路由
             initRouter().then(() => {
               router.push(getTopMenu(true).path);

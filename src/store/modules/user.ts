@@ -4,10 +4,11 @@ import { userType } from "./types";
 import { routerArrays } from "@/layout/types";
 import { router, resetRouter } from "@/router";
 import { storageSession } from "@pureadmin/utils";
-import { getLogin } from "@/api/user";
-import { UserResult } from "@/api/user";
+import { LoginParam, getLogin } from "@/api/user";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
+import SystemResponse from "@/music-api/code/SystemResponse";
+import { LoginVO } from "@/music-api/vo/LoginVO";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -28,8 +29,8 @@ export const useUserStore = defineStore({
       this.roles = roles;
     },
     /** 登入 */
-    async loginByUsername(data) {
-      return new Promise<UserResult>((resolve, reject) => {
+    async loginByUsername(data: LoginParam) {
+      return new Promise<SystemResponse<LoginVO>>((resolve, reject) => {
         getLogin(data)
           .then(data => {
             if (data) {

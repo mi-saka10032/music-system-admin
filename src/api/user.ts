@@ -1,30 +1,11 @@
 import { http } from "@/utils/http";
+import SystemResponse from "@/music-api/code/SystemResponse";
+import { LoginDTO } from "@/music-api/dto/LoginDTO";
+import { LoginVO } from "@/music-api/vo/LoginVO";
 
-export type UserResult = {
-  success: boolean;
-  data: {
-    /** 用户名 */
-    username: string;
-    /** 当前登陆用户的角色 */
-    roles: Array<string>;
-    /** `token` */
-    accessToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    expires: Date;
-  };
-};
-
-export type RefreshTokenResult = {
-  success: boolean;
-  data: {
-    /** `token` */
-    accessToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
-    expires: Date;
-  };
-};
+export type LoginParam = Pick<LoginDTO, keyof LoginDTO>;
 
 /** 登录 */
-export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/login", { data });
+export const getLogin = (data: LoginParam) => {
+  return http.request<SystemResponse<LoginVO>>("post", "/login", { data });
 };
