@@ -45,7 +45,10 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "123456" })
+        .loginByUsername({
+          username: ruleForm.username,
+          password: ruleForm.password
+        })
         .then((res: SystemResponse<LoginVO>) => {
           if (res.data?.accessToken) {
             // 获取后端路由

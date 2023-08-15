@@ -1,12 +1,18 @@
 import { reactive } from "vue";
 import type { FormRules } from "element-plus";
-
-/** 密码正则（密码格式应为8-18位数字、字母、符号的任意两种组合） */
-export const REGEXP_PWD =
-  /^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)(?!([^(0-9a-zA-Z)]|[()])+$)(?!^.*[\u4E00-\u9FA5].*$)([^(0-9a-zA-Z)]|[()]|[a-z]|[A-Z]|[0-9]){8,18}$/;
+import { REGEXP_PWD } from "@/music-api/rule/LoginRule";
 
 /** 登录校验 */
 const loginRules = reactive(<FormRules>{
+  username: [
+    {
+      required: true,
+      message: "用户名长度在5-20位之间",
+      min: 5,
+      max: 20,
+      trigger: "blur"
+    }
+  ],
   password: [
     {
       validator: (rule, value, callback) => {
