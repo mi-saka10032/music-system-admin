@@ -82,11 +82,13 @@ function isOneOfArray(a: Array<string>, b: Array<string>) {
 }
 
 /** 从sessionStorage里取出当前登陆用户的角色roles，过滤无权限的菜单 */
+/** 增加一条，meta.hiddenTag为true时，隐藏此目录 */
 function filterNoPermissionTree(data: RouteComponent[]) {
   const currentRoles =
     storageSession().getItem<DataInfo<number>>(sessionKey)?.roles ?? [];
-  const newTree = cloneDeep(data).filter((v: any) =>
-    isOneOfArray(v.meta?.roles, currentRoles)
+  const newTree = cloneDeep(data).filter(
+    (v: any) =>
+      isOneOfArray(v.meta?.roles, currentRoles) && v.meta?.hiddenTag !== true
   );
   newTree.forEach(
     (v: any) => v.children && (v.children = filterNoPermissionTree(v.children))
