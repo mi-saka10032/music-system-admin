@@ -5,7 +5,9 @@ import { LoginVO } from "@/music-api/vo/LoginVO";
 
 export type LoginParam = Pick<LoginDTO, keyof LoginDTO>;
 
+export type LoginResult = Pick<LoginVO, keyof LoginVO>;
+
 /** 登录 */
 export const getLogin = (data: LoginParam) => {
-  return http.request<SystemResponse<LoginVO>>("post", "/login", { data });
+  return http.request<SystemResponse<LoginResult>>("post", "/login", { data });
 };

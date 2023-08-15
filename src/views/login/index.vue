@@ -18,7 +18,7 @@ import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
 import SystemResponse from "@/music-api/code/SystemResponse";
-import { LoginVO } from "@/music-api/vo/LoginVO";
+import type { LoginResult } from "@/api/user";
 
 defineOptions({
   name: "Login"
@@ -49,7 +49,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           username: ruleForm.username,
           password: ruleForm.password
         })
-        .then((res: SystemResponse<LoginVO>) => {
+        .then((res: SystemResponse<LoginResult>) => {
           if (res.data?.accessToken) {
             // 获取后端路由
             initRouter().then(() => {

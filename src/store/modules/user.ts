@@ -8,7 +8,7 @@ import { LoginParam, getLogin } from "@/api/user";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
 import SystemResponse from "@/music-api/code/SystemResponse";
-import { LoginVO } from "@/music-api/vo/LoginVO";
+import type { LoginResult } from "@/api/user";
 
 export const useUserStore = defineStore({
   id: "pure-user",
@@ -30,7 +30,7 @@ export const useUserStore = defineStore({
     },
     /** 登入 */
     async loginByUsername(data: LoginParam) {
-      return new Promise<SystemResponse<LoginVO>>((resolve, reject) => {
+      return new Promise<SystemResponse<LoginResult>>((resolve, reject) => {
         getLogin(data)
           .then(data => {
             if (data) {
