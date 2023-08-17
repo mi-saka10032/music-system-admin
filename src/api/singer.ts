@@ -1,7 +1,8 @@
 import { http } from "@/utils/http";
 import SystemResponse from "@/music-api/code/SystemResponse";
 import { SingerDTO } from "@/music-api/dto/SingerDTO";
-import { SingerVO, SingerListVO } from "@/music-api/vo/SingerVO";
+import { SingerVO } from "@/music-api/vo/SingerVO";
+import { PageVOClass } from "@/music-api/vo/PageVO";
 
 // 表单类型
 export type SingerForm = Pick<SingerDTO, "singerName" | "coverUrl">;
@@ -16,7 +17,10 @@ export type SingerParam = Omit<SingerDTO, "id">;
 export type SingerResult = Pick<SingerVO, keyof SingerVO>;
 
 // page查询出参列表类型
-export type SingerResultList = Pick<SingerListVO, keyof SingerListVO>;
+export type SingerResultList = Pick<
+  PageVOClass<SingerResult>,
+  keyof PageVOClass<SingerResult>
+>;
 
 const singerPrefix = "/singer";
 

@@ -5,7 +5,6 @@ import type {
   SingerForm,
   SingerParam,
   SingerResult,
-  SingerResultList,
   SingerDetail
 } from "@/api/singer";
 import {
@@ -15,7 +14,7 @@ import {
   createSinger,
   deleteSinger
 } from "@/api/singer";
-import type { SongResult } from "@/api/song";
+import type { BaseSongResult } from "@/api/song";
 import type { DialogOptions } from "@/components/ReDialog";
 import { addDialog } from "@/components/ReDialog";
 import SingerSongsTable from "./components/SingerSongsTable.vue";
@@ -132,7 +131,7 @@ const singerDialog = reactive<DialogOptions>({
 });
 
 /** 歌手详情-歌曲列表 */
-const singerSongs = ref<Array<SongResult>>([]);
+const singerSongs = ref<Array<BaseSongResult>>([]);
 
 /** 歌手详情-歌曲弹窗 */
 const singerSongsDialog = reactive<DialogOptions>({
@@ -151,9 +150,7 @@ const singerSongsDialog = reactive<DialogOptions>({
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data }: SingerResultList = await getSingerLists(
-      singerRequest.value
-    );
+    const { data } = await getSingerLists(singerRequest.value);
     const list: Array<SingerResult> = data.list;
     tableData.value = list;
     pagination.total = data.total;
@@ -182,7 +179,7 @@ async function openDialog(
   id?: number
 ): Promise<void> {
   if (id && id !== 0) {
-    const { data }: SingerResultList = await getSingerDetail(id);
+    const { data } = await getSingerDetail(id);
     formValue.id = data.id;
     formValue.singerName = data.singerName;
     formValue.coverUrl = data.coverUrl;

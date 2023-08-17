@@ -1,9 +1,13 @@
 // import { http } from "@/utils/http";
 // import SystemResponse from "@/music-api/code/SystemResponse";
-import { SongVO, SongListVO } from "@/music-api/vo/SongVO";
+import { BaseSongVO } from "@/music-api/vo/BaseVO";
+import { PageVOClass } from "@/music-api/vo/PageVO";
 
-// 出参类型
-export type SongResult = Pick<SongVO, keyof SongVO>;
+// BaseSong出参类型
+export type BaseSongResult = Pick<BaseSongVO, keyof BaseSongVO>;
 
-// 出参列表类型
-export type SongResultList = Pick<SongListVO, keyof SongListVO>;
+// BaseSong出参列表类型
+export type BaseSongResultList = Pick<
+  PageVOClass<BaseSongResult>,
+  keyof PageVOClass<BaseSongResult>
+>;

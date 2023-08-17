@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTable } from "@/layout/hooks/useTable";
-import { SongResult } from "@/api/song";
+import { BaseSongResult } from "@/api/song";
 import { onMounted } from "vue";
 
 /** 歌手管理下的歌曲列表管理 */
@@ -10,10 +10,11 @@ defineOptions({
 
 /** props歌手的歌曲列表  */
 const props = defineProps<{
-  singerSongs: Array<SongResult>;
+  singerSongs: Array<BaseSongResult>;
 }>();
 
-const { tableColumns, tableData, pagination, loading } = useTable<SongResult>();
+const { tableColumns, tableData, pagination, loading } =
+  useTable<BaseSongResult>();
 
 tableColumns.value = [
   {
