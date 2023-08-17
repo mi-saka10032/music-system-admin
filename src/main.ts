@@ -7,8 +7,9 @@ import { createApp, Directive } from "vue";
 import { MotionPlugin } from "@vueuse/motion";
 // import { useEcharts } from "@/plugins/echarts";
 import { injectResponsiveStorage } from "@/utils/responsive";
+import errorHandler from "./utils/errorHandler";
 
-// import Table from "@pureadmin/table";
+import Table from "@pureadmin/table";
 // import PureDescriptions from "@pureadmin/descriptions";
 
 // 引入重置样式
@@ -40,18 +41,25 @@ app.component("IconifyIconOffline", IconifyIconOffline);
 app.component("IconifyIconOnline", IconifyIconOnline);
 app.component("FontIcon", FontIcon);
 
-// 全局注册按钮级别权限组件
+// 全局注册按钮级别权限组件 & 其他组件
 import { Auth } from "@/components/ReAuth";
+import ReCol from "@/components/ReCol";
+import SimpleForm from "@/components/SimpleForm/index.vue";
+import InlineButton from "@/components/InlineButton/index.vue";
 app.component("Auth", Auth);
+app.component("ReCol", ReCol);
+app.component("SimpleForm", SimpleForm);
+app.component("InlineButton", InlineButton);
 
 getServerConfig(app).then(async config => {
   app.use(router);
   await router.isReady();
   injectResponsiveStorage(app, config);
   setupStore(app);
-  app.use(MotionPlugin).use(ElementPlus);
+  app.use(MotionPlugin).use(ElementPlus).use(Table);
   // .use(useEcharts);
-  // .use(Table);
   // .use(PureDescriptions);
+  // 统一异常处理
+  app.config.errorHandler = errorHandler;
   app.mount("#app");
 });

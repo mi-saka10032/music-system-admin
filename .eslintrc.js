@@ -115,6 +115,7 @@ module.exports = {
       {
         endOfLine: "auto"
       }
-    ]
+    ],
+    "vue/no-mutating-props": "off"
   }
 };
