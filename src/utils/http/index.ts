@@ -108,7 +108,9 @@ class PureHttp {
         // 判断响应数据code
         const systemResponse: SystemResponse = response.data;
         if (!systemResponse) {
-          return Promise.reject("服务器响应数据格式不正确，请检查服务器配置");
+          const error_msg = "服务器响应数据格式不正确，请检查服务器配置";
+          message(error_msg, { type: "error" });
+          return Promise.reject(error_msg);
         }
         const { code, msg } = systemResponse;
         // code非OK状态下，返回错误信息
@@ -116,7 +118,7 @@ class PureHttp {
           if (code === ErrorCode.LOGIN_ERROR) {
             router.replace("/login");
           }
-          message(msg);
+          message(msg, { type: "error" });
           return Promise.reject(msg);
         }
         // 正常返回数据
@@ -137,6 +139,7 @@ class PureHttp {
         // 关闭进度条动画
         NProgress.done();
         // 所有的响应异常 区分来源为取消请求/非取消请求
+        message(error.message, { type: "error" });
         return Promise.reject($error);
       }
     );
