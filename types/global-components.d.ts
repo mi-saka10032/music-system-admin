@@ -7,6 +7,9 @@ declare module "vue" {
     IconifyIconOnline: typeof import("../src/components/ReIcon")["IconifyIconOnline"];
     FontIcon: typeof import("../src/components/ReIcon")["FontIcon"];
     Auth: typeof import("../src/components/ReAuth")["Auth"];
+    ReCol: typeof import("../src/components/ReCol")["ReCol"];
+    SimpleForm: typeof import("../src/components/SimpleForm/index.vue")["default"];
+    InlineButton: typeof import("../src/components/InlineButton/index.vue")["default"];
   }
 }
 

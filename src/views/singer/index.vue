@@ -18,6 +18,7 @@ import type { BaseSongResult } from "@/api/song";
 import type { DialogOptions } from "@/components/ReDialog";
 import { addDialog } from "@/components/ReDialog";
 import SingerSongsTable from "./components/SingerSongsTable.vue";
+import ReCol from "@/components/ReCol";
 import { message } from "@/utils/message";
 
 defineOptions({
@@ -139,8 +140,8 @@ const singerSongsDialog = reactive<DialogOptions>({
   contentRenderer: () => (
     <div>
       <el-row class="mt-5 mb-5">
-        <re-col value={12}>歌手ID：{formValue.id}</re-col>
-        <re-col value={12}>歌手名称：{formValue.singerName}</re-col>
+        <ReCol value={12}>歌手ID：{formValue.id}</ReCol>
+        <ReCol value={12}>歌手名称：{formValue.singerName}</ReCol>
       </el-row>
       <SingerSongsTable singerSongs={singerSongs.value} />
     </div>
