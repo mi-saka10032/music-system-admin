@@ -102,6 +102,8 @@ class PureHttp {
     const instance = PureHttp.axiosInstance;
     instance.interceptors.response.use(
       (response: PureHttpResponse) => {
+        // 关闭进度条动画
+        NProgress.done();
         const $config = response.config;
         // 判断响应数据code
         const systemResponse: SystemResponse = response.data;
@@ -117,8 +119,6 @@ class PureHttp {
           message(msg);
           return Promise.reject(msg);
         }
-        // 关闭进度条动画
-        NProgress.done();
         // 正常返回数据
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
         if (typeof $config.beforeResponseCallback === "function") {
