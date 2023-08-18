@@ -15,12 +15,11 @@ import {
   deleteSinger
 } from "@/api/singer";
 import type { BaseSongResult } from "@/api/song";
-import type { DialogOptions } from "@/components/ReDialog";
-import { addDialog } from "@/components/ReDialog";
-import BaseSongsTable from "@/views/song/components/BaseSongsTable.vue";
-import ReCol from "@/components/ReCol";
-import { message } from "@/utils/message";
+import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
+import ReCol from "@/components/ReCol";
+import BaseSongsTable from "@/views/song/components/BaseSongsTable.vue";
+import { message } from "@/utils/message";
 
 defineOptions({
   name: "Singer"

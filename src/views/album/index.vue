@@ -1,21 +1,25 @@
 <script setup lang="tsx">
-import { getAlbumLists, deleteAlbum, getAlbumDetail } from "@/api/album";
-import {
-  updateAlbum,
-  type AlbumDetail,
-  type AlbumForm,
-  type AlbumParam,
-  type AlbumResult,
-  createAlbum
-} from "@/api/album";
-import { BaseSongResult } from "@/api/song";
-import ReCol from "@/components/ReCol";
-import { DialogOptions, addDialog } from "@/components/ReDialog";
 import { useTable } from "@/layout/hooks/useTable";
-import { message } from "@/utils/message";
 import { ref, reactive, onMounted, computed } from "vue";
+import type {
+  AlbumForm,
+  AlbumParam,
+  AlbumResult,
+  AlbumDetail
+} from "@/api/album";
+import {
+  getAlbumLists,
+  getAlbumDetail,
+  updateAlbum,
+  createAlbum,
+  deleteAlbum
+} from "@/api/album";
+import type { BaseSongResult } from "@/api/song";
+import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
+import ReCol from "@/components/ReCol";
 import BaseSongsTable from "../song/components/BaseSongsTable.vue";
+import { message } from "@/utils/message";
 import formatDateWithAny from "@/utils/formatDate";
 
 defineOptions({
