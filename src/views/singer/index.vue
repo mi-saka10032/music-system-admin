@@ -17,9 +17,10 @@ import {
 import type { BaseSongResult } from "@/api/song";
 import type { DialogOptions } from "@/components/ReDialog";
 import { addDialog } from "@/components/ReDialog";
-import SingerSongsTable from "./components/SingerSongsTable.vue";
+import BaseSongsTable from "@/views/song/components/BaseSongsTable.vue";
 import ReCol from "@/components/ReCol";
 import { message } from "@/utils/message";
+import SimpleForm from "@/components/SimpleForm/index.vue";
 
 defineOptions({
   name: "Singer"
@@ -44,9 +45,7 @@ const singerForm = reactive<SingerForm>({
 
 /** 歌手表格配置 */
 tableColumns.value = [
-  {
-    type: "selection"
-  },
+  { type: "selection" },
   {
     label: "歌手名称",
     prop: "singerName"
@@ -58,7 +57,7 @@ tableColumns.value = [
       row["coverUrl"] ? (
         <img src={row["coverUrl"]} class="w-24 h-24" />
       ) : (
-        <div class="w-24 h-24"></div>
+        <div class="w-24 h-24" />
       )
   },
   {
@@ -97,33 +96,28 @@ const singerRequest = computed<SingerParam>(() => ({
 }));
 
 /** 歌手详情表单 */
-const formValue = reactive<SingerDetail>({
+const singerFormDetail = reactive<SingerDetail>({
   id: null,
   singerName: "",
   coverUrl: ""
 });
 
-// 歌手详情弹窗
+/** 歌手详情弹窗 */
 const singerDialog = reactive<DialogOptions>({
   title: "歌手详情",
   contentRenderer: () => (
-    <el-form model={formValue} size="large" labelWidth="100px">
-      {singerFormColumns.value.map(column => (
-        <el-form-item label={column.label} value={column.prop}>
-          <el-input
-            clearable
-            v-model={formValue[column.prop as keyof SingerForm]}
-          />
-        </el-form-item>
-      ))}
-    </el-form>
+    <SimpleForm
+      formValue={singerFormDetail}
+      formColumns={singerFormColumns.value}
+      showButton={false}
+    />
   ),
   beforeSure: async (done: Function) => {
-    if (formValue.id !== 0) {
-      await updateSinger(formValue);
+    if (singerFormDetail.id && singerFormDetail.id !== 0) {
+      await updateSinger(singerFormDetail);
       message("修改成功", { type: "success" });
     } else {
-      await createSinger(formValue);
+      await createSinger(singerFormDetail);
       message("新增成功", { type: "success" });
     }
     done();
@@ -136,14 +130,14 @@ const singerSongs = ref<Array<BaseSongResult>>([]);
 
 /** 歌手详情-歌曲弹窗 */
 const singerSongsDialog = reactive<DialogOptions>({
-  title: "歌曲详情",
+  title: "歌手-歌曲详情",
   contentRenderer: () => (
     <div>
       <el-row class="mt-5 mb-5">
-        <ReCol value={12}>歌手ID：{formValue.id}</ReCol>
-        <ReCol value={12}>歌手名称：{formValue.singerName}</ReCol>
+        <ReCol value={12}>歌手ID：{singerFormDetail.id}</ReCol>
+        <ReCol value={12}>歌手名称：{singerFormDetail.singerName}</ReCol>
       </el-row>
-      <SingerSongsTable singerSongs={singerSongs.value} />
+      <BaseSongsTable baseSongs={singerSongs.value} />
     </div>
   )
 });
@@ -181,14 +175,14 @@ async function openDialog(
 ): Promise<void> {
   if (id && id !== 0) {
     const { data } = await getSingerDetail(id);
-    formValue.id = data.id;
-    formValue.singerName = data.singerName;
-    formValue.coverUrl = data.coverUrl;
+    singerFormDetail.id = data.id;
+    singerFormDetail.singerName = data.singerName;
+    singerFormDetail.coverUrl = data.coverUrl;
     singerSongs.value = data.songs;
   } else {
-    formValue.id = 0;
-    formValue.singerName = "";
-    formValue.coverUrl = "";
+    singerFormDetail.id = 0;
+    singerFormDetail.singerName = "";
+    singerFormDetail.coverUrl = "";
     singerSongs.value = [];
   }
   addDialog(dialogOption);
@@ -225,10 +219,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- 歌手查询表单 -->
     <SimpleForm
       :form-value="singerForm"
       :form-columns="singerFormColumns"
+      :show-button="true"
       @query="getLists"
       @reset="resetLists"
       @create="openDialog(singerDialog)"
@@ -246,7 +240,7 @@ onMounted(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openDialog(singerDialog, row.id)"
+          @inline-edit="openDialog(singerDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

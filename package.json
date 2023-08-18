@@ -6,7 +6,7 @@
     "typecheck": "tsc --noEmit && vue-tsc --noEmit --skipLibCheck",
     "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite",
     "serve": "pnpm typecheck && pnpm dev",
-    "build": "pnpm typecheck && rimraf dist && NODE_OPTIONS=--max-old-space-size=8192 vite build",
+    "build": "pnpm typecheck && pnpm lint && rimraf dist && NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "build:staging": "rimraf dist && vite build --mode staging",
     "report": "rimraf dist && vite build",
     "preview": "vite preview",

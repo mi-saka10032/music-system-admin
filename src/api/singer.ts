@@ -4,19 +4,19 @@ import { SingerDTO } from "@/music-api/dto/SingerDTO";
 import { SingerVO } from "@/music-api/vo/SingerVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 
-// 表单类型
+/** 表单类型 */
 export type SingerForm = Pick<SingerDTO, "singerName" | "coverUrl">;
 
-// 更新参数类型
+/** 更新参数类型 */
 export type SingerDetail = Pick<SingerDTO, "id" | "singerName" | "coverUrl">;
 
-// page查询入参类型
+/** page查询入参类型 */
 export type SingerParam = Omit<SingerDTO, "id">;
 
-// page查询出参类型
+/** page查询出参类型 */
 export type SingerResult = Pick<SingerVO, keyof SingerVO>;
 
-// page查询出参列表类型
+/** page查询出参列表类型 */
 export type SingerResultList = Pick<
   PageVOClass<SingerResult>,
   keyof PageVOClass<SingerResult>
@@ -52,7 +52,8 @@ export const updateSinger = (data: SingerDetail) => {
 };
 
 /** 新增歌手信息 */
-export const createSinger = (data: SingerForm) => {
+export const createSinger = (data: SingerDetail) => {
+  delete data.id;
   return http.request<SystemResponse<SingerResult>>(
     "post",
     `${singerPrefix}/create`,

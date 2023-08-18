@@ -15,6 +15,7 @@ defineOptions({
 interface SimpleForm {
   formColumns: TableColumnList;
   formValue: { [key: string]: any };
+  showButton: boolean;
 }
 
 defineProps<SimpleForm>();
@@ -46,7 +47,7 @@ const emit = defineEmits(["query", "reset", "create", "delete"]);
         </template>
       </el-form-item>
     </el-form>
-    <div class="btn_box relative h-8 mb-4">
+    <div v-if="showButton" class="btn_box relative h-8 mb-4">
       <div class="btn_container absolute right-0 bottom-0">
         <el-button type="success" @click="emit('query')">查询</el-button>
         <el-button type="primary" @click="emit('reset')">重置</el-button>

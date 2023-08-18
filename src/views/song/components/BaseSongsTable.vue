@@ -1,16 +1,17 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
 import { BaseSongResult } from "@/api/song";
 import { onMounted } from "vue";
+import formatDateWithAny from "@/utils/formatDate";
 
 /** 歌手管理下的歌曲列表管理 */
 defineOptions({
-  name: "SingerSongsTable"
+  name: "BaseSongsTable"
 });
 
 /** props歌手的歌曲列表  */
 const props = defineProps<{
-  singerSongs: Array<BaseSongResult>;
+  baseSongs: Array<BaseSongResult>;
 }>();
 
 const { tableColumns, tableData, pagination, loading } =
@@ -36,12 +37,15 @@ tableColumns.value = [
   },
   {
     label: "发行日期",
-    prop: "publishTime"
+    prop: "publishTime",
+    cellRenderer: ({ row }) => (
+      <div>{formatDateWithAny(row["publishTime"])}</div>
+    )
   }
 ];
 
 onMounted(() => {
-  tableData.value = props.singerSongs;
+  tableData.value = props.baseSongs;
 });
 </script>
 
