@@ -13,6 +13,8 @@ import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import { message } from "@/utils/message";
 import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
+import { type SingerParam, getSingerLists } from "@/api/singer";
+import { type AlbumParam, getAlbumLists } from "@/api/album";
 
 defineOptions({
   name: "Song"
@@ -112,12 +114,25 @@ const songFormColumns = computed(() => [
 
 /** 歌曲表单详情配置 与上面的查询用表单略有区别 */
 const songFormDetailColumns = computed(() => [
-  ...tableColumns.value.slice(1, 8),
+  // 截取 歌名、歌词、链接
+  ...tableColumns.value.slice(1, 4),
+  // 此处的三个自定义插槽，需要在songDialog实现
+  {
+    label: "所属专辑",
+    prop: "albumName",
+    slot: "albumName"
+  },
+  {
+    label: "歌手",
+    prop: "singerName",
+    slot: "singerName"
+  },
   {
     label: "发行日期",
     prop: "publishTime",
     slot: "publishTime"
-  }
+  },
+  ...tableColumns.value.slice(7, 8)
 ]);
 
 /** 歌曲请求参数 */
@@ -139,7 +154,9 @@ const songFormDetail = reactive<SongDetail>({
   duration: 0,
   lyric: "",
   musicUrl: "",
-  publishTime: null
+  publishTime: null,
+  albumId: null,
+  singerIds: []
 });
 
 /** 歌曲详情弹窗 */
@@ -152,6 +169,29 @@ const songDialog = reactive<DialogOptions>({
       showButton={false}
       isFlex={false}
       v-slots={{
+        albumName: () => (
+          <el-select
+            v-model={songFormDetail.albumId}
+            clearable={true}
+            placeholder="请选择专辑"
+          >
+            {song_albums.value.map(item => (
+              <el-option value={item.value} label={item.label} />
+            ))}
+          </el-select>
+        ),
+        singerName: () => (
+          <el-select
+            v-model={songFormDetail.singerIds}
+            multiple={true}
+            clearable={true}
+            placeholder="请选择歌手"
+          >
+            {song_singers.value.map(item => (
+              <el-option value={item.value} label={item.label} />
+            ))}
+          </el-select>
+        ),
         publishTime: () => (
           <el-date-picker
             v-model={songFormDetail.publishTime}
@@ -163,7 +203,6 @@ const songDialog = reactive<DialogOptions>({
     ></SimpleForm>
   ),
   beforeSure: async (done: Function) => {
-    // TODO
     // 歌曲的新增与更新参数区别较大，新增时支持同时新增所属专辑与歌手
     // 专辑or歌手不存在则新建并关联，若存在则直接关联
     if (songFormDetail.id && songFormDetail.id !== 0) {
@@ -177,6 +216,39 @@ const songDialog = reactive<DialogOptions>({
     getLists();
   }
 });
+
+interface OptionValue {
+  label: string;
+  value: string | number;
+}
+
+/** 歌曲详情-歌手筛选项列表 */
+const song_singers = ref<Array<OptionValue>>([]);
+
+// singer的全量筛选项 挂载时触发
+async function querySingerLists(): Promise<void> {
+  const param = { pageNo: 1, pageSize: 1000 };
+  const { data } = await getSingerLists(param as SingerParam);
+  song_singers.value = data.list.map(item => ({
+    value: item.id,
+    label: item.singerName
+  }));
+}
+
+/** 歌曲详情-专辑筛选项列表 */
+const song_albums = ref<Array<OptionValue>>([]);
+
+// album的全量筛选项 挂载时触发
+async function queryAlbumLists(): Promise<void> {
+  const param = { pageNo: 1, pageSize: 1000 };
+  const { data } = await getAlbumLists(param as AlbumParam);
+  song_albums.value = data.list.map(item => ({
+    value: item.id,
+    label: item.albumName
+  }));
+}
+
+/** 歌曲详情-专辑筛选项列表 */
 
 async function getLists(): Promise<void> {
   openLoading();
@@ -221,14 +293,17 @@ async function openDialog(
     songFormDetail.lyric = data.lyric;
     songFormDetail.musicUrl = data.musicUrl;
     songFormDetail.publishTime = data.publishTime;
-    // TODO 专辑与歌手
+    songFormDetail.albumId = data.album?.id;
+    songFormDetail.singerIds = data.singers.map(item => item.id);
   } else {
-    songFormDetail.id = 0;
+    songFormDetail.id = null;
     songFormDetail.songName = "";
-    songFormDetail.duration = 0;
+    songFormDetail.duration = null;
     songFormDetail.lyric = "";
     songFormDetail.musicUrl = "";
     songFormDetail.publishTime = null;
+    songFormDetail.albumId = null;
+    songFormDetail.singerIds = [];
   }
   addDialog(dialogOption);
 }
@@ -259,6 +334,8 @@ function handlePageSizeChange(ps: number) {
 
 onMounted(() => {
   getLists();
+  querySingerLists();
+  queryAlbumLists();
 });
 </script>
 

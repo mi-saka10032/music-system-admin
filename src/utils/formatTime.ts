@@ -13,7 +13,13 @@ type DurationFormatFunction = (seconds: number) => string;
 export const formatDateWithAny: DateFormatFunction = (
   date,
   format = "YYYY-MM-DD"
-) => dayjs(date).format(format);
+) => {
+  if (date == null) {
+    return "";
+  }
+  const target = new Date(date);
+  return isNaN(target.getTime()) ? "" : dayjs(date).format(format);
+};
 
 /** 秒数格式化为X分X秒 */
 export const formatDuration: DurationFormatFunction = seconds =>
