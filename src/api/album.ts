@@ -5,10 +5,7 @@ import { AlbumVO } from "@/music-api/vo/AlbumVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 
 /** 表单类型 */
-export type AlbumForm = Pick<
-  AlbumDTO,
-  "albumName" | "coverUrl" | "startPublishTime" | "endPublishTime"
->;
+export type AlbumForm = Omit<AlbumDTO, "id" | "pageNo" | "pageSize">;
 
 /** 更新参数类型 */
 export type AlbumDetail = Pick<

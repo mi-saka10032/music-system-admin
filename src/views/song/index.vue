@@ -1,29 +1,21 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
 import { ref, reactive, onMounted, computed } from "vue";
-import type {
-  AlbumForm,
-  AlbumParam,
-  AlbumResult,
-  AlbumDetail
-} from "@/api/album";
+import type { SongForm, SongParam, SongResult, SongDetail } from "@/api/song";
 import {
-  getAlbumLists,
-  getAlbumDetail,
-  updateAlbum,
-  createAlbum,
-  deleteAlbum
-} from "@/api/album";
-import type { BaseSongResult } from "@/api/song";
+  getSongLists,
+  getSongDetail,
+  updateSong,
+  createSong,
+  deleteSong
+} from "@/api/song";
 import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
-import ReCol from "@/components/ReCol";
-import BaseSongsTable from "../song/components/BaseSongsTable.vue";
 import { message } from "@/utils/message";
-import { formatDateWithAny } from "@/utils/formatTime";
+import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 
 defineOptions({
-  name: "Album"
+  name: "Song"
 });
 
 const {
@@ -35,32 +27,49 @@ const {
   pagination,
   openLoading,
   closeLoading
-} = useTable<AlbumResult>();
+} = useTable<SongResult>();
 
-/** 专辑表单 */
-const albumForm = reactive<AlbumForm>({
-  albumName: "",
-  coverUrl: "",
+/** 歌曲表单 */
+const songForm = reactive<SongForm>({
+  songName: "",
+  lyric: "",
   startPublishTime: null,
-  endPublishTime: null
+  endPublishTime: null,
+  albumName: "",
+  singerName: ""
 });
 
-/** 专辑表格配置 */
+/** 歌曲表格配置 */
 tableColumns.value = [
   { type: "selection" },
   {
-    label: "专辑名称",
-    prop: "albumName"
+    label: "歌曲名称",
+    prop: "songName"
   },
   {
-    label: "专辑图片链接",
-    prop: "coverUrl",
-    cellRenderer: ({ row }) =>
-      row["coverUrl"] ? (
-        <img src={row["coverUrl"]} class="w-24 h-24" />
-      ) : (
-        <div class="w-24 h-24" />
-      )
+    label: "歌词",
+    prop: "lyric",
+    showOverflowTooltip: true
+  },
+  {
+    label: "链接",
+    prop: "musicUrl"
+  },
+  {
+    label: "所属专辑",
+    prop: "albumName",
+    cellRenderer: ({ row }) => <>{(row as SongResult).album?.albumName}</>
+  },
+  {
+    label: "歌手",
+    prop: "singerName",
+    cellRenderer: ({ row }) => (
+      <div>
+        {(row as SongResult).singers.map(singer => (
+          <div>{singer.singerName}</div>
+        ))}
+      </div>
+    )
   },
   {
     label: "发行日期",
@@ -68,16 +77,11 @@ tableColumns.value = [
     cellRenderer: ({ row }) => <>{formatDateWithAny(row["publishTime"])}</>
   },
   {
-    label: "歌曲列表",
-    prop: "songs",
-    cellRenderer: ({ row }) => (
-      <el-button
-        type="success"
-        onClick={() => openDialog(albumSongsDialog, row.id as number)}
-      >
-        编辑查看
-      </el-button>
-    )
+    label: "歌曲时长",
+    prop: "duration",
+    cellRenderer: ({ row }) => <>{formatDuration(row["duration"])}</>,
+    // SimpleForm 指定 className 为 set_number 表明el-input应采取number形式
+    className: "set_number"
   },
   {
     label: "操作",
@@ -91,9 +95,9 @@ pagination.pageSize = ORIGIN_PAGE_SIZE;
 /** 已选中表格ids */
 const checkedIds = ref<Array<number>>([]);
 
-/** 专辑查询表单配置 */
-const albumFormColumns = computed(() => [
-  ...tableColumns.value.slice(1, 3),
+/** 歌曲查询表单配置 */
+const songFormColumns = computed(() => [
+  ...tableColumns.value.slice(1, 7),
   {
     label: "开始发行日期",
     prop: "startPublishTime",
@@ -106,9 +110,9 @@ const albumFormColumns = computed(() => [
   }
 ]);
 
-/** 专辑表单详情配置 与上面的查询用表单配置略有区别 */
-const albumFormDetailColumns = computed(() => [
-  ...tableColumns.value.slice(1, 3),
+/** 歌曲表单详情配置 与上面的查询用表单略有区别 */
+const songFormDetailColumns = computed(() => [
+  ...tableColumns.value.slice(1, 8),
   {
     label: "发行日期",
     prop: "publishTime",
@@ -116,50 +120,57 @@ const albumFormDetailColumns = computed(() => [
   }
 ]);
 
-/** 专辑请求参数 */
-const albumRequest = computed<AlbumParam>(() => ({
-  albumName: albumForm.albumName,
-  coverUrl: albumForm.coverUrl,
-  startPublishTime: albumForm.startPublishTime,
-  endPublishTime: albumForm.endPublishTime,
+/** 歌曲请求参数 */
+const songRequest = computed<SongParam>(() => ({
+  songName: songForm.songName,
+  lyric: songForm.lyric,
+  startPublishTime: songForm.startPublishTime,
+  endPublishTime: songForm.endPublishTime,
+  albumName: songForm.albumName,
+  singerName: songForm.singerName,
   pageNo: pagination.currentPage,
   pageSize: pagination.pageSize
 }));
 
-/** 专辑详情表单 */
-const albumFormDetail = reactive<AlbumDetail>({
+/** 歌曲详情表单 */
+const songFormDetail = reactive<SongDetail>({
   id: null,
-  albumName: "",
-  coverUrl: "",
+  songName: "",
+  duration: 0,
+  lyric: "",
+  musicUrl: "",
   publishTime: null
 });
 
-/** 专辑详情弹窗 */
-const albumDialog = reactive<DialogOptions>({
-  title: "专辑详情",
+/** 歌曲详情弹窗 */
+const songDialog = reactive<DialogOptions>({
+  title: "歌曲详情",
   contentRenderer: () => (
     <SimpleForm
-      formValue={albumFormDetail}
-      formColumns={albumFormDetailColumns.value}
+      formValue={songFormDetail}
+      formColumns={songFormDetailColumns.value}
       showButton={false}
       isFlex={false}
       v-slots={{
         publishTime: () => (
           <el-date-picker
-            v-model={albumFormDetail.publishTime}
+            v-model={songFormDetail.publishTime}
             type="date"
             placeholder="发行日期"
           />
         )
       }}
-    />
+    ></SimpleForm>
   ),
   beforeSure: async (done: Function) => {
-    if (albumFormDetail.id && albumFormDetail.id !== 0) {
-      await updateAlbum(albumFormDetail);
+    // TODO
+    // 歌曲的新增与更新参数区别较大，新增时支持同时新增所属专辑与歌手
+    // 专辑or歌手不存在则新建并关联，若存在则直接关联
+    if (songFormDetail.id && songFormDetail.id !== 0) {
+      await updateSong(songFormDetail);
       message("修改成功", { type: "success" });
     } else {
-      await createAlbum(albumFormDetail);
+      await createSong(songFormDetail);
       message("新增成功", { type: "success" });
     }
     done();
@@ -167,29 +178,11 @@ const albumDialog = reactive<DialogOptions>({
   }
 });
 
-/** 专辑详情-歌曲列表 */
-const albumSongs = ref<Array<BaseSongResult>>([]);
-
-/** 专辑详情-歌曲弹窗 */
-const albumSongsDialog = reactive<DialogOptions>({
-  title: "专辑-歌曲详情",
-  contentRenderer: () => (
-    <div>
-      <el-row class="mt-5 mb-5">
-        <ReCol value={8}>专辑ID：{albumFormDetail.id}</ReCol>
-        <ReCol value={8}>专辑名称：{albumFormDetail.albumName}</ReCol>
-        <ReCol value={8}>发行日期：{albumFormDetail.publishTime}</ReCol>
-      </el-row>
-      <BaseSongsTable baseSongs={albumSongs.value} />
-    </div>
-  )
-});
-
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data } = await getAlbumLists(albumRequest.value);
-    const list: Array<AlbumResult> = data.list;
+    const { data } = await getSongLists(songRequest.value);
+    const list: Array<SongResult> = data.list;
     tableData.value = list;
     pagination.total = data.total;
   } catch (error: any) {
@@ -199,17 +192,19 @@ async function getLists(): Promise<void> {
 }
 
 function resetLists(): void {
-  albumForm.albumName = "";
-  albumForm.coverUrl = "";
-  albumForm.startPublishTime = null;
-  albumForm.endPublishTime = null;
+  songForm.songName = "";
+  songForm.lyric = "";
+  songForm.albumName = "";
+  songForm.singerName = "";
+  songForm.startPublishTime = null;
+  songForm.endPublishTime = null;
   pagination.currentPage = ORIGIN_CURRENT_PAGE;
   pagination.pageSize = ORIGIN_PAGE_SIZE;
   getLists();
 }
 
 async function deleteList(id: number): Promise<void> {
-  await deleteAlbum(id);
+  await deleteSong(id);
   message("删除成功", { type: "success" });
   getLists();
 }
@@ -219,29 +214,32 @@ async function openDialog(
   id?: number
 ): Promise<void> {
   if (id && id !== 0) {
-    const { data } = await getAlbumDetail(id);
-    albumFormDetail.id = data.id;
-    albumFormDetail.albumName = data.albumName;
-    albumFormDetail.coverUrl = data.coverUrl;
-    albumFormDetail.publishTime = data.publishTime;
-    albumSongs.value = data.songs;
+    const { data } = await getSongDetail(id);
+    songFormDetail.id = data.id;
+    songFormDetail.songName = data.songName;
+    songFormDetail.duration = data.duration;
+    songFormDetail.lyric = data.lyric;
+    songFormDetail.musicUrl = data.musicUrl;
+    songFormDetail.publishTime = data.publishTime;
+    // TODO 专辑与歌手
   } else {
-    albumFormDetail.id = 0;
-    albumFormDetail.albumName = "";
-    albumFormDetail.coverUrl = "";
-    albumFormDetail.publishTime = null;
-    albumSongs.value = [];
+    songFormDetail.id = 0;
+    songFormDetail.songName = "";
+    songFormDetail.duration = 0;
+    songFormDetail.lyric = "";
+    songFormDetail.musicUrl = "";
+    songFormDetail.publishTime = null;
   }
   addDialog(dialogOption);
 }
 
-function injectCheckedIds(checkedTableData: Array<AlbumResult>) {
+function injectCheckedIds(checkedTableData: Array<SongResult>) {
   checkedIds.value = checkedTableData.map(item => item.id);
 }
 
 async function batchDeleteLists() {
   if (checkedIds.value.length > 0) {
-    await Promise.all(checkedIds.value.map(id => deleteAlbum(id)));
+    await Promise.all(checkedIds.value.map(id => deleteSong(id)));
     message("删除成功", { type: "success" });
     getLists();
   } else {
@@ -267,26 +265,25 @@ onMounted(() => {
 <template>
   <div>
     <SimpleForm
-      class="simple_form"
-      :form-value="albumForm"
-      :form-columns="albumFormColumns"
+      :form-value="songForm"
+      :form-columns="songFormColumns"
       :show-button="true"
       :is-flex="true"
       @query="getLists"
       @reset="resetLists"
-      @create="openDialog(albumDialog)"
+      @create="openDialog(songDialog)"
       @delete="batchDeleteLists"
     >
       <template #startPublishTime>
         <el-date-picker
-          v-model="albumForm.startPublishTime"
+          v-model="songForm.startPublishTime"
           type="date"
           placeholder="开始日期"
         />
       </template>
       <template #endPublishTime>
         <el-date-picker
-          v-model="albumForm.endPublishTime"
+          v-model="songForm.endPublishTime"
           type="date"
           placeholder="截止日期"
         />
@@ -304,7 +301,7 @@ onMounted(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openDialog(albumDialog, row.id as number)"
+          @inline-edit="openDialog(songDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

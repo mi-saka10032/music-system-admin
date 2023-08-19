@@ -1,8 +1,8 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { BaseSongResult } from "@/api/song";
+import type { BaseSongResult } from "@/api/song";
 import { onMounted } from "vue";
-import formatDateWithAny from "@/utils/formatDate";
+import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 
 /** 歌手管理下的歌曲列表管理 */
 defineOptions({
@@ -24,7 +24,8 @@ tableColumns.value = [
   },
   {
     label: "歌曲时长",
-    prop: "duration"
+    prop: "duration",
+    cellRenderer: ({ row }) => <>{formatDuration(row["duration"])}</>
   },
   {
     label: "歌词",
@@ -38,9 +39,7 @@ tableColumns.value = [
   {
     label: "发行日期",
     prop: "publishTime",
-    cellRenderer: ({ row }) => (
-      <div>{formatDateWithAny(row["publishTime"])}</div>
-    )
+    cellRenderer: ({ row }) => <>{formatDateWithAny(row["publishTime"])}</>
   }
 ];
 

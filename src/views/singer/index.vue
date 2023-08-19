@@ -109,6 +109,7 @@ const singerDialog = reactive<DialogOptions>({
       formValue={singerFormDetail}
       formColumns={singerFormColumns.value}
       showButton={false}
+      isFlex={false}
     />
   ),
   beforeSure: async (done: Function) => {
@@ -222,6 +223,7 @@ onMounted(() => {
       :form-value="singerForm"
       :form-columns="singerFormColumns"
       :show-button="true"
+      :is-flex="true"
       @query="getLists"
       @reset="resetLists"
       @create="openDialog(singerDialog)"

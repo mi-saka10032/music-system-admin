@@ -69,6 +69,24 @@ export const getAsyncRoutes = () => {
             }
           }
         ]
+      },
+      {
+        path: "/song",
+        meta: {
+          title: "歌曲管理",
+          icon: "lollipop",
+          rank: 13
+        },
+        children: [
+          {
+            path: "/song/index",
+            name: "Song",
+            meta: {
+              title: "歌曲管理",
+              roles: ["admin"]
+            }
+          }
+        ]
       }
     ]
   });

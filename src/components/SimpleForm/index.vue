@@ -3,8 +3,10 @@
  * @description 简单表单组件
  * 根据formColumns动态生成表单相关组件，默认生成el-input
  * el-input默认与formValue绑定，键名是item.prop，请注意prop的声明
+ * item.className存在额外排定，当item.className包含set_number时表示el-input应切换为number形式
  * 其余组件如select、datepicker请在item.slot中声明name并在外部使用插槽
  * 功能按钮在下部点缀，如果需要位置调整，请使用deep穿透btn_box和btn_container来调整position
+ * 最后isFlex表示是否将form行内排列，true则每行4等分排列，false则每个item一行排列
  */
 import type { TableColumnList } from "@/layout/hooks/useTable";
 
@@ -16,6 +18,7 @@ interface SimpleForm {
   formColumns: TableColumnList;
   formValue: { [key: string]: any };
   showButton: boolean;
+  isFlex: boolean;
 }
 
 defineProps<SimpleForm>();
@@ -26,24 +29,29 @@ const emit = defineEmits(["query", "reset", "create", "delete"]);
 <template>
   <div>
     <el-form
-      class="flex"
       :model="formValue"
       label-width="100px"
       label-position="left"
-      inline
+      :class="isFlex ? 'flex flex-wrap' : ''"
+      :inline="isFlex"
     >
       <el-form-item
         v-for="(item, index) in formColumns"
         :key="index"
         :label="item.label"
         :value="item.prop"
-        class="min-w-[25%]"
+        :class="isFlex ? 'w-[25%] max-w-lg balance_date !mr-0 pr-5' : ''"
       >
         <template v-if="item.slot">
           <slot :name="item.slot" />
         </template>
         <template v-else>
-          <el-input clearable v-model="formValue[item.prop as string]" />
+          <el-input
+            v-if="item.className && item.className.includes('set_number')"
+            clearable
+            v-model.number="formValue[item.prop as string]"
+          />
+          <el-input v-else clearable v-model="formValue[item.prop as string]" />
         </template>
       </el-form-item>
     </el-form>
@@ -57,3 +65,11 @@ const emit = defineEmits(["query", "reset", "create", "delete"]);
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+::v-deep(.balance_date) {
+  .el-date-editor {
+    width: 100%;
+  }
+}
+</style>

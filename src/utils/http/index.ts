@@ -11,12 +11,13 @@ import {
 } from "./types.d";
 import { stringify } from "qs";
 import NProgress from "../progress";
-import { getToken, formatToken } from "@/utils/auth";
+import { getToken, formatToken, sessionKey } from "@/utils/auth";
 
 import router from "@/router";
 import SystemResponse from "@/music-api/code/SystemResponse";
 import { ErrorCode } from "@/music-api/code/ErrorCode";
 import { message } from "@/utils/message";
+import { storageSession } from "@pureadmin/utils";
 
 // 相关配置请参考：http://www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
@@ -116,6 +117,7 @@ class PureHttp {
         // code非OK状态下，返回错误信息
         if (code !== ErrorCode.OK) {
           if (code === ErrorCode.LOGIN_ERROR) {
+            storageSession().removeItem(sessionKey);
             router.replace("/login");
           }
           message(msg, { type: "error" });
@@ -173,18 +175,18 @@ class PureHttp {
   }
 
   /** 单独抽离的post工具函数 */
-  public post<T, P>(
+  public post<P>(
     url: string,
-    params?: AxiosRequestConfig<T>,
+    params?: AxiosRequestConfig,
     config?: PureHttpRequestConfig
   ): Promise<P> {
     return this.request<P>("post", url, params, config);
   }
 
   /** 单独抽离的get工具函数 */
-  public get<T, P>(
+  public get<P>(
     url: string,
-    params?: AxiosRequestConfig<T>,
+    params?: AxiosRequestConfig,
     config?: PureHttpRequestConfig
   ): Promise<P> {
     return this.request<P>("get", url, params, config);
