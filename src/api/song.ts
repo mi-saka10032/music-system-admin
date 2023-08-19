@@ -1,11 +1,6 @@
 import { http } from "@/utils/http";
 import SystemResponse from "@/music-api/code/SystemResponse";
-import {
-  SongDTO,
-  UpdateSongDTO,
-  Shelve_Singer_SongDTO,
-  Shelve_Album_SongDTO
-} from "@/music-api/dto/SongDTO";
+import { SongDTO, UpdateSongDTO } from "@/music-api/dto/SongDTO";
 import { BaseSongVO } from "@/music-api/vo/BaseVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 import { SongVO } from "@/music-api/vo/SongVO";
@@ -19,25 +14,11 @@ export type BaseSongResultList = Pick<
   keyof PageVOClass<BaseSongResult>
 >;
 
-/** album与song关联类型 */
-export type Shelve_Album_Song = Pick<
-  Shelve_Album_SongDTO,
-  keyof Shelve_Album_SongDTO
->;
-
-/** song与song关联类型 */
-export type Shelve_Singer_Song = Pick<
-  Shelve_Singer_SongDTO,
-  keyof Shelve_Singer_SongDTO
->;
-
 /** 表单类型 */
 export type SongForm = Omit<SongDTO, "id" | "pageNo" | "pageSize">;
 
 /** 更新参数类型 */
-export type SongDetail = Pick<UpdateSongDTO, keyof UpdateSongDTO> &
-  Pick<Shelve_Album_Song, "albumId"> &
-  Pick<Shelve_Singer_Song, "singerIds">;
+export type SongDetail = Pick<UpdateSongDTO, keyof UpdateSongDTO>;
 
 /** page查询入参类型 */
 export type SongParam = Omit<SongDTO, "id">;
@@ -86,19 +67,5 @@ export const createSong = (data: SongDetail) => {
 export const deleteSong = (id: number) => {
   return http.post<SystemResponse<boolean>>(`${songPrefix}/delete`, {
     params: { id }
-  });
-};
-
-/** 关联/解除歌曲与专辑的联系 */
-export const shelveAlbumById = (data: Shelve_Album_Song) => {
-  return http.post<SystemResponse<boolean>>(`${songPrefix}/shelveAlbumId`, {
-    data
-  });
-};
-
-/** 关联/解除歌曲与歌手们的联系 */
-export const shelveSingerById = (data: Shelve_Singer_Song) => {
-  return http.post<SystemResponse<boolean>>(`${songPrefix}/shelveSingerId`, {
-    data
   });
 };
