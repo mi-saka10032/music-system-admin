@@ -6,7 +6,7 @@
  * 表单内部的组件类型根据item.type来动态判断生成，请注意
  * 当item.type === 'select' || 'multi_select' 时，注意为item.options填充静态or动态的筛选项数据
  * 注意item.type === 'slot' 并开启item.slot来开启自定义插槽
- * 功能按钮在下部点缀，如果需要位置调整，请使用deep穿透btn_box和btn_container来调整position
+ * 功能按钮在下部点缀，如果需要位置调整，请使用deep穿透btn_container来调整position
  * 最后isFlex表示是否将form行内排列，true则每行4等分排列，false则每个item一行排列
  */
 import type { FormColumn } from "@/store/modules/music";
@@ -92,13 +92,11 @@ const confirmDelete = async () => {
         </template>
       </el-form-item>
     </el-form>
-    <div v-if="showButton" class="btn_box relative h-8 mb-4">
-      <div class="btn_container absolute right-0 bottom-0">
-        <el-button type="success" @click="emit('query')">查询</el-button>
-        <el-button type="primary" @click="emit('reset')">重置</el-button>
-        <el-button type="warning" @click="emit('create')">新增</el-button>
-        <el-button type="danger" @click="confirmDelete">删除</el-button>
-      </div>
+    <div class="btn_container flex justify-end mb-4">
+      <el-button type="success" @click="emit('query')">查询</el-button>
+      <el-button type="primary" @click="emit('reset')">重置</el-button>
+      <el-button type="warning" @click="emit('create')">新增</el-button>
+      <el-button type="danger" @click="confirmDelete">删除</el-button>
     </div>
   </div>
 </template>

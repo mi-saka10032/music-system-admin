@@ -16,11 +16,12 @@ import {
   createSong,
   deleteSong
 } from "@/api/song";
-import { type DialogOptions, addDialog } from "@/components/ReDialog";
-import SimpleForm from "@/components/SimpleForm/index.vue";
-import { message } from "@/utils/message";
 import { type SingerParam, getSingerLists } from "@/api/singer";
 import { type AlbumParam, getAlbumLists } from "@/api/album";
+import { type DialogOptions, addDialog } from "@/components/ReDialog";
+import SimpleForm from "@/components/SimpleForm/index.vue";
+import MusicUpload from "@/components/MusicUpload/index.vue";
+import { message } from "@/utils/message";
 
 defineOptions({
   name: "Song"
@@ -276,6 +277,7 @@ onMounted(() => {
       @create="openDialog(songCreateDialog)"
       @delete="batchDeleteLists"
     />
+    <MusicUpload />
     <pure-table
       :loading="loading"
       :columns="tableColumns"
