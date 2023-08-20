@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { ref, reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { useMusicStoreHook } from "@/store/modules/music";
 import type { SongForm, SongParam, SongResult, SongDetail } from "@/api/song";
 import {
@@ -27,8 +27,12 @@ const {
   tableColumns,
   tableData,
   pagination,
+  checkedIds,
   openLoading,
-  closeLoading
+  closeLoading,
+  injectCheckedIds,
+  handleCurrentPageChange,
+  handlePageSizeChange
 } = useTable<SongResult>();
 
 /** 歌曲表单 */
@@ -43,11 +47,6 @@ const songForm = reactive<SongForm>({
 
 /** 歌曲表格配置 */
 tableColumns.value = useMusicStoreHook().songTableColumns;
-
-pagination.pageSize = ORIGIN_PAGE_SIZE;
-
-/** 已选中表格ids */
-const checkedIds = ref<Array<number>>([]);
 
 /** 歌曲查询表单配置 */
 const songFormColumns = useMusicStoreHook().songQueryFormColumns;
@@ -194,10 +193,6 @@ async function openDialog(
   addDialog(dialogOption);
 }
 
-function injectCheckedIds(checkedTableData: Array<SongResult>) {
-  checkedIds.value = checkedTableData.map(item => item.id);
-}
-
 async function batchDeleteLists() {
   if (checkedIds.value.length > 0) {
     await Promise.all(checkedIds.value.map(id => deleteSong(id)));
@@ -206,16 +201,6 @@ async function batchDeleteLists() {
   } else {
     message("当前无选中项", { type: "error" });
   }
-}
-
-function handleCurrentPageChange(cp: number) {
-  pagination.currentPage = cp;
-  getLists();
-}
-
-function handlePageSizeChange(ps: number) {
-  pagination.pageSize = ps;
-  getLists();
 }
 
 onMounted(() => {
@@ -243,8 +228,8 @@ onMounted(() => {
       :data="tableData"
       :pagination="pagination"
       @selection-change="injectCheckedIds"
-      @page-current-change="handleCurrentPageChange"
-      @page-size-change="handlePageSizeChange"
+      @page-current-change="handleCurrentPageChange($event, getLists)"
+      @page-size-change="handlePageSizeChange($event, getLists)"
     >
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">

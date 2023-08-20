@@ -34,8 +34,12 @@ const {
   tableColumns,
   tableData,
   pagination,
+  checkedIds,
   openLoading,
-  closeLoading
+  closeLoading,
+  injectCheckedIds,
+  handleCurrentPageChange,
+  handlePageSizeChange
 } = useTable<SingerResult>();
 
 /** 歌手表单 */
@@ -46,11 +50,6 @@ const singerForm = reactive<SingerForm>({
 
 /** 歌手表格配置 */
 tableColumns.value = useMusicStoreHook().singerTableColumns;
-
-pagination.pageSize = ORIGIN_PAGE_SIZE;
-
-/** 已选中表格ids */
-const checkedIds = ref<Array<number>>([]);
 
 /** 歌手表单配置 */
 const singerFormColumns = useMusicStoreHook().singerFormColumns;
@@ -157,10 +156,6 @@ async function openDialog(
   addDialog(dialogOption);
 }
 
-function injectCheckedIds(checkedTableData: Array<SingerResult>) {
-  checkedIds.value = checkedTableData.map(item => item.id);
-}
-
 async function batchDeleteLists() {
   if (checkedIds.value.length > 0) {
     await Promise.all(checkedIds.value.map(id => deleteSinger(id)));
@@ -169,16 +164,6 @@ async function batchDeleteLists() {
   } else {
     message("当前无选中项", { type: "error" });
   }
-}
-
-function handleCurrentPageChange(cp: number) {
-  pagination.currentPage = cp;
-  getLists();
-}
-
-function handlePageSizeChange(ps: number) {
-  pagination.pageSize = ps;
-  getLists();
 }
 
 onMounted(() => {
@@ -211,8 +196,8 @@ onBeforeUnmount(() => {
       :data="tableData"
       :pagination="pagination"
       @selection-change="injectCheckedIds"
-      @page-current-change="handleCurrentPageChange"
-      @page-size-change="handlePageSizeChange"
+      @page-current-change="handleCurrentPageChange($event, getLists)"
+      @page-size-change="handlePageSizeChange($event, getLists)"
     >
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
