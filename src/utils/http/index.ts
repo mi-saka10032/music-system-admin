@@ -72,7 +72,7 @@ class PureHttp {
         // 滤除body参数data中作为空字符串 null undefined的部分
         if (typeof config.data === "object") {
           Object.keys(config.data).forEach((key: string) => {
-            if (!config.data[key]) {
+            if (config.data[key] === "") {
               delete config.data[key];
             }
           });

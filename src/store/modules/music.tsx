@@ -1,7 +1,9 @@
+import { type UnwrapRef } from "vue";
 import { store } from "@/store";
 import { defineStore } from "pinia";
 import { emitter } from "@/utils/mitt";
 import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
+import { cloneDeep } from "@pureadmin/utils";
 import type { SongResult } from "@/api/song";
 
 type MusicStoreId = "admin-music";
@@ -12,7 +14,7 @@ export interface OptionValue {
 }
 
 export interface FormColumn {
-  type: "input" | "input_number" | "select" | "multi_select" | "date";
+  type: "input" | "input_number" | "select" | "multi_select" | "date" | "slot";
   label: string;
   prop: string;
   placeholder?: string;
@@ -31,7 +33,16 @@ export interface MusicState {
   songDetailFormColumns: Array<FormColumn>;
 }
 
-export const useMusicStore = defineStore<MusicStoreId, MusicState>({
+export interface MusicGetters {
+  [key: string]: any;
+  songCreateFormColumns: (state: UnwrapRef<MusicState>) => Array<FormColumn>;
+}
+
+export const useMusicStore = defineStore<
+  MusicStoreId,
+  MusicState,
+  MusicGetters
+>({
   id: "admin-music",
   state: () => ({
     // 歌手表格配置
@@ -254,7 +265,7 @@ export const useMusicStore = defineStore<MusicStoreId, MusicState>({
         placeholder: "截止日期"
       }
     ],
-    // 歌曲详情表单配置，与上面的查询用表单配置略有区别
+    // 歌曲编辑详情表单配置，与上面的查询用表单配置略有区别
     songDetailFormColumns: [
       {
         type: "input",
@@ -289,16 +300,29 @@ export const useMusicStore = defineStore<MusicStoreId, MusicState>({
         type: "date",
         label: "发行日期",
         prop: "publishTime",
-        placeholder: "开始日期"
+        placeholder: "发行日期"
       },
       {
         type: "input_number",
         label: "歌曲时长",
-        prop: "duration",
-        placeholder: "截止日期"
+        prop: "duration"
       }
     ]
-  })
+  }),
+  getters: {
+    // 歌曲新增详情表单配置，新增歌手简化为单选模式
+    songCreateFormColumns: state => {
+      const columns = cloneDeep(state.songDetailFormColumns);
+      columns.splice(4, 1, {
+        type: "select",
+        label: "新增歌手",
+        prop: "singerId",
+        options: [],
+        placeholder: "请选择歌手"
+      });
+      return columns;
+    }
+  }
 });
 
 export function useMusicStoreHook() {

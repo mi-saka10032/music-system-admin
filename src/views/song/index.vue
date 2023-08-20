@@ -2,7 +2,13 @@
 import { useTable } from "@/layout/hooks/useTable";
 import { reactive, computed, onMounted } from "vue";
 import { useMusicStoreHook } from "@/store/modules/music";
-import type { SongForm, SongParam, SongResult, SongDetail } from "@/api/song";
+import type {
+  SongForm,
+  SongParam,
+  SongResult,
+  SongDetail,
+  SongCreate
+} from "@/api/song";
 import {
   getSongLists,
   getSongDetail,
@@ -54,6 +60,9 @@ const songFormColumns = useMusicStoreHook().songQueryFormColumns;
 /** 歌曲表单详情配置 与上面的查询用表单略有区别 */
 const songFormDetailColumns = useMusicStoreHook().songDetailFormColumns;
 
+/** 歌曲新增表单详情配置 */
+const songFormCreateColumn = useMusicStoreHook().songCreateFormColumns;
+
 /** 歌曲请求参数 */
 const songRequest = computed<SongParam>(() => ({
   songName: songForm.songName,
@@ -66,7 +75,7 @@ const songRequest = computed<SongParam>(() => ({
   pageSize: pagination.pageSize
 }));
 
-/** 歌曲详情表单 */
+/** 歌曲编辑详情表单 */
 const songFormDetail = reactive<SongDetail>({
   id: null,
   songName: "",
@@ -78,8 +87,8 @@ const songFormDetail = reactive<SongDetail>({
   singerIds: []
 });
 
-/** 歌曲详情弹窗 */
-const songDialog = reactive<DialogOptions>({
+/** 歌曲编辑详情弹窗 */
+const songDetailDialog = reactive<DialogOptions>({
   title: "歌曲详情",
   contentRenderer: () => (
     <SimpleForm
@@ -90,15 +99,47 @@ const songDialog = reactive<DialogOptions>({
     />
   ),
   beforeSure: async (done: Function) => {
-    // 歌曲的新增与更新参数区别较大，新增时支持同时新增所属专辑与歌手
-    // 专辑or歌手不存在则新建并关联，若存在则直接关联
-    if (songFormDetail.id && songFormDetail.id !== 0) {
-      await updateSong(songFormDetail);
-      message("修改成功", { type: "success" });
-    } else {
-      await createSong(songFormDetail);
-      message("新增成功", { type: "success" });
-    }
+    await updateSong(songFormDetail);
+    message("修改成功", { type: "success" });
+    done();
+    getLists();
+  }
+});
+
+/** 歌曲新增详情表单 */
+const songFormCreate = reactive<SongCreate>({
+  songName: "",
+  duration: 0,
+  lyric: "",
+  musicUrl: "",
+  publishTime: null,
+  album: {
+    albumName: "",
+    coverUrl: "",
+    publishTime: null
+  },
+  singer: {
+    singerName: "",
+    coverUrl: ""
+  },
+  albumId: null,
+  singerId: null
+});
+
+/** 歌曲新增详情表单 */
+const songCreateDialog = reactive<DialogOptions>({
+  title: "新增歌曲",
+  contentRenderer: () => (
+    <SimpleForm
+      formValue={songFormCreate}
+      formColumns={songFormCreateColumn}
+      showButton={false}
+      isFlex={false}
+    />
+  ),
+  beforeSure: async (done: Function) => {
+    await createSong(songFormCreate);
+    message("新增成功", { type: "success" });
     done();
     getLists();
   }
@@ -108,12 +149,19 @@ const songDialog = reactive<DialogOptions>({
 async function querySingerLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getSingerLists(param as SingerParam);
+  const options = data.list.map(item => ({
+    value: item.id,
+    label: item.singerName
+  }));
   for (let i = 0; i < songFormDetailColumns.length; i++) {
     if (songFormDetailColumns[i].prop === "singerIds") {
-      songFormDetailColumns[i].options = data.list.map(item => ({
-        value: item.id,
-        label: item.singerName
-      }));
+      songFormDetailColumns[i].options = options;
+      break;
+    }
+  }
+  for (let i = 0; i < songFormCreateColumn.length; i++) {
+    if (songFormCreateColumn[i].prop === "singerId") {
+      songFormCreateColumn[i].options = options;
       break;
     }
   }
@@ -123,12 +171,19 @@ async function querySingerLists(): Promise<void> {
 async function queryAlbumLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getAlbumLists(param as AlbumParam);
+  const options = data.list.map(item => ({
+    value: item.id,
+    label: item.albumName
+  }));
   for (let i = 0; i < songFormDetailColumns.length; i++) {
     if (songFormDetailColumns[i].prop === "albumId") {
-      songFormDetailColumns[i].options = data.list.map(item => ({
-        value: item.id,
-        label: item.albumName
-      }));
+      songFormDetailColumns[i].options = options;
+      break;
+    }
+  }
+  for (let i = 0; i < songFormCreateColumn.length; i++) {
+    if (songFormCreateColumn[i].prop === "albumId") {
+      songFormCreateColumn[i].options = options;
       break;
     }
   }
@@ -181,14 +236,13 @@ async function openDialog(
     songFormDetail.albumId = data.album?.id;
     songFormDetail.singerIds = data.singers.map(item => item.id);
   } else {
-    songFormDetail.id = null;
-    songFormDetail.songName = "";
-    songFormDetail.duration = null;
-    songFormDetail.lyric = "";
-    songFormDetail.musicUrl = "";
-    songFormDetail.publishTime = null;
-    songFormDetail.albumId = null;
-    songFormDetail.singerIds = [];
+    songFormCreate.songName = "";
+    songFormCreate.duration = null;
+    songFormCreate.lyric = "";
+    songFormCreate.musicUrl = "";
+    songFormCreate.publishTime = null;
+    songFormCreate.albumId = null;
+    songFormCreate.singerId = null;
   }
   addDialog(dialogOption);
 }
@@ -219,7 +273,7 @@ onMounted(() => {
       :is-flex="true"
       @query="getLists"
       @reset="resetLists"
-      @create="openDialog(songDialog)"
+      @create="openDialog(songCreateDialog)"
       @delete="batchDeleteLists"
     />
     <pure-table
@@ -234,7 +288,7 @@ onMounted(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openDialog(songDialog, row.id as number)"
+          @inline-edit="openDialog(songDetailDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

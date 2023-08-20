@@ -1,6 +1,6 @@
 import { http } from "@/utils/http";
 import SystemResponse from "@/music-api/code/SystemResponse";
-import { SongDTO, UpdateSongDTO } from "@/music-api/dto/SongDTO";
+import { SongDTO, UpdateSongDTO, NewSongDTO } from "@/music-api/dto/SongDTO";
 import { BaseSongVO } from "@/music-api/vo/BaseVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 import { SongVO } from "@/music-api/vo/SongVO";
@@ -32,6 +32,9 @@ export type SongResultList = Pick<
   keyof PageVOClass<SongResult>
 >;
 
+/** 新增歌曲表单参数类型 */
+export type SongCreate = Pick<NewSongDTO, keyof NewSongDTO>;
+
 const songPrefix = "/song";
 
 /** 获取歌曲列表 */
@@ -56,8 +59,7 @@ export const updateSong = (data: SongDetail) => {
 };
 
 /** 创建歌曲信息 */
-export const createSong = (data: SongDetail) => {
-  delete data.id;
+export const createSong = (data: SongCreate) => {
   return http.post<SystemResponse<SongResult>>(`${songPrefix}/create`, {
     data
   });
