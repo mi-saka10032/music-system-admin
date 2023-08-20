@@ -1,6 +1,8 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
+import { useMusicStoreHook } from "@/store/modules/music";
+import { emitter } from "@/utils/mitt";
 import type {
   SingerForm,
   SingerParam,
@@ -43,40 +45,7 @@ const singerForm = reactive<SingerForm>({
 });
 
 /** 歌手表格配置 */
-tableColumns.value = [
-  { type: "selection" },
-  {
-    label: "歌手名称",
-    prop: "singerName"
-  },
-  {
-    label: "封面图片链接",
-    prop: "coverUrl",
-    cellRenderer: ({ row }) =>
-      row["coverUrl"] ? (
-        <img src={row["coverUrl"]} class="w-24 h-24" />
-      ) : (
-        <div class="w-24 h-24" />
-      )
-  },
-  {
-    label: "歌曲列表",
-    prop: "songs",
-    cellRenderer: ({ row }) => (
-      <el-button
-        type="success"
-        onClick={() => openDialog(singerSongsDialog, row.id as number)}
-      >
-        编辑查看
-      </el-button>
-    )
-  },
-  {
-    label: "操作",
-    fixed: "right",
-    slot: "operation"
-  }
-];
+tableColumns.value = useMusicStoreHook().singerTableColumns;
 
 pagination.pageSize = ORIGIN_PAGE_SIZE;
 
@@ -84,7 +53,7 @@ pagination.pageSize = ORIGIN_PAGE_SIZE;
 const checkedIds = ref<Array<number>>([]);
 
 /** 歌手表单配置 */
-const singerFormColumns = computed(() => tableColumns.value.slice(1, 3));
+const singerFormColumns = useMusicStoreHook().singerFormColumns;
 
 /** 歌手请求参数 */
 const singerRequest = computed<SingerParam>(() => ({
@@ -107,7 +76,7 @@ const singerDialog = reactive<DialogOptions>({
   contentRenderer: () => (
     <SimpleForm
       formValue={singerFormDetail}
-      formColumns={singerFormColumns.value}
+      formColumns={singerFormColumns}
       showButton={false}
       isFlex={false}
     />
@@ -214,6 +183,13 @@ function handlePageSizeChange(ps: number) {
 
 onMounted(() => {
   getLists();
+  emitter.on("openSingerSongsDialog", id => {
+    openDialog(singerSongsDialog, Number(id));
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off("openSingerSongsDialog");
 });
 </script>
 

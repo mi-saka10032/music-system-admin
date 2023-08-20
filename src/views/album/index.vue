@@ -1,6 +1,8 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
+import { useMusicStoreHook } from "@/store/modules/music";
+import { emitter } from "@/utils/mitt";
 import type {
   AlbumForm,
   AlbumParam,
@@ -20,7 +22,6 @@ import SimpleForm from "@/components/SimpleForm/index.vue";
 import ReCol from "@/components/ReCol";
 import BaseSongsTable from "../song/components/BaseSongsTable.vue";
 import { message } from "@/utils/message";
-import { formatDateWithAny } from "@/utils/formatTime";
 
 defineOptions({
   name: "Album"
@@ -46,45 +47,7 @@ const albumForm = reactive<AlbumForm>({
 });
 
 /** 专辑表格配置 */
-tableColumns.value = [
-  { type: "selection" },
-  {
-    label: "专辑名称",
-    prop: "albumName"
-  },
-  {
-    label: "专辑图片链接",
-    prop: "coverUrl",
-    cellRenderer: ({ row }) =>
-      row["coverUrl"] ? (
-        <img src={row["coverUrl"]} class="w-24 h-24" />
-      ) : (
-        <div class="w-24 h-24" />
-      )
-  },
-  {
-    label: "发行日期",
-    prop: "publishTime",
-    cellRenderer: ({ row }) => <>{formatDateWithAny(row["publishTime"])}</>
-  },
-  {
-    label: "歌曲列表",
-    prop: "songs",
-    cellRenderer: ({ row }) => (
-      <el-button
-        type="success"
-        onClick={() => openDialog(albumSongsDialog, row.id as number)}
-      >
-        编辑查看
-      </el-button>
-    )
-  },
-  {
-    label: "操作",
-    fixed: "right",
-    slot: "operation"
-  }
-];
+tableColumns.value = useMusicStoreHook().albumTableColumns;
 
 pagination.pageSize = ORIGIN_PAGE_SIZE;
 
@@ -92,29 +55,10 @@ pagination.pageSize = ORIGIN_PAGE_SIZE;
 const checkedIds = ref<Array<number>>([]);
 
 /** 专辑查询表单配置 */
-const albumFormColumns = computed(() => [
-  ...tableColumns.value.slice(1, 3),
-  {
-    label: "开始发行日期",
-    prop: "startPublishTime",
-    slot: "startPublishTime"
-  },
-  {
-    label: "截止发行日期",
-    prop: "endPublishTime",
-    slot: "endPublishTime"
-  }
-]);
+const albumFormColumns = useMusicStoreHook().albumQueryFormColumns;
 
 /** 专辑表单详情配置 与上面的查询用表单配置略有区别 */
-const albumFormDetailColumns = computed(() => [
-  ...tableColumns.value.slice(1, 3),
-  {
-    label: "发行日期",
-    prop: "publishTime",
-    slot: "publishTime"
-  }
-]);
+const albumFormDetailColumns = useMusicStoreHook().albumDetailFormColumns;
 
 /** 专辑请求参数 */
 const albumRequest = computed<AlbumParam>(() => ({
@@ -140,18 +84,9 @@ const albumDialog = reactive<DialogOptions>({
   contentRenderer: () => (
     <SimpleForm
       formValue={albumFormDetail}
-      formColumns={albumFormDetailColumns.value}
+      formColumns={albumFormDetailColumns}
       showButton={false}
       isFlex={false}
-      v-slots={{
-        publishTime: () => (
-          <el-date-picker
-            v-model={albumFormDetail.publishTime}
-            type="date"
-            placeholder="发行日期"
-          />
-        )
-      }}
     />
   ),
   beforeSure: async (done: Function) => {
@@ -261,6 +196,13 @@ function handlePageSizeChange(ps: number) {
 
 onMounted(() => {
   getLists();
+  emitter.on("openAlbumSongsDialog", id => {
+    openDialog(albumSongsDialog, Number(id));
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off("openAlbumSongsDialog");
 });
 </script>
 
@@ -276,22 +218,7 @@ onMounted(() => {
       @reset="resetLists"
       @create="openDialog(albumDialog)"
       @delete="batchDeleteLists"
-    >
-      <template #startPublishTime>
-        <el-date-picker
-          v-model="albumForm.startPublishTime"
-          type="date"
-          placeholder="开始日期"
-        />
-      </template>
-      <template #endPublishTime>
-        <el-date-picker
-          v-model="albumForm.endPublishTime"
-          type="date"
-          placeholder="截止日期"
-        />
-      </template>
-    </SimpleForm>
+    />
     <pure-table
       :loading="loading"
       :columns="tableColumns"

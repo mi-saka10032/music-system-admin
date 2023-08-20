@@ -8,6 +8,8 @@ type Events = {
   tagViewsShowModel: string;
   logoChange: boolean;
   changLayoutRoute: string;
+  openSingerSongsDialog: string;
+  openAlbumSongsDialog: string;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();

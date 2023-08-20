@@ -1,6 +1,7 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
+import { useMusicStoreHook } from "@/store/modules/music";
 import type { SongForm, SongParam, SongResult, SongDetail } from "@/api/song";
 import {
   getSongLists,
@@ -12,7 +13,6 @@ import {
 import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import { message } from "@/utils/message";
-import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 import { type SingerParam, getSingerLists } from "@/api/singer";
 import { type AlbumParam, getAlbumLists } from "@/api/album";
 
@@ -42,55 +42,7 @@ const songForm = reactive<SongForm>({
 });
 
 /** 歌曲表格配置 */
-tableColumns.value = [
-  { type: "selection" },
-  {
-    label: "歌曲名称",
-    prop: "songName"
-  },
-  {
-    label: "歌词",
-    prop: "lyric",
-    showOverflowTooltip: true
-  },
-  {
-    label: "链接",
-    prop: "musicUrl"
-  },
-  {
-    label: "所属专辑",
-    prop: "albumName",
-    cellRenderer: ({ row }) => <>{(row as SongResult).album?.albumName}</>
-  },
-  {
-    label: "歌手",
-    prop: "singerName",
-    cellRenderer: ({ row }) => (
-      <div>
-        {(row as SongResult).singers.map(singer => (
-          <div>{singer.singerName}</div>
-        ))}
-      </div>
-    )
-  },
-  {
-    label: "发行日期",
-    prop: "publishTime",
-    cellRenderer: ({ row }) => <>{formatDateWithAny(row["publishTime"])}</>
-  },
-  {
-    label: "歌曲时长",
-    prop: "duration",
-    cellRenderer: ({ row }) => <>{formatDuration(row["duration"])}</>,
-    // SimpleForm 指定 className 为 set_number 表明el-input应采取number形式
-    className: "set_number"
-  },
-  {
-    label: "操作",
-    fixed: "right",
-    slot: "operation"
-  }
-];
+tableColumns.value = useMusicStoreHook().songTableColumns;
 
 pagination.pageSize = ORIGIN_PAGE_SIZE;
 
@@ -98,42 +50,10 @@ pagination.pageSize = ORIGIN_PAGE_SIZE;
 const checkedIds = ref<Array<number>>([]);
 
 /** 歌曲查询表单配置 */
-const songFormColumns = computed(() => [
-  ...tableColumns.value.slice(1, 7),
-  {
-    label: "开始发行日期",
-    prop: "startPublishTime",
-    slot: "startPublishTime"
-  },
-  {
-    label: "截止发行日期",
-    prop: "endPublishTime",
-    slot: "endPublishTime"
-  }
-]);
+const songFormColumns = useMusicStoreHook().songQueryFormColumns;
 
 /** 歌曲表单详情配置 与上面的查询用表单略有区别 */
-const songFormDetailColumns = computed(() => [
-  // 截取 歌名、歌词、链接
-  ...tableColumns.value.slice(1, 4),
-  // 此处的三个自定义插槽，需要在songDialog实现
-  {
-    label: "所属专辑",
-    prop: "albumName",
-    slot: "albumName"
-  },
-  {
-    label: "歌手",
-    prop: "singerName",
-    slot: "singerName"
-  },
-  {
-    label: "发行日期",
-    prop: "publishTime",
-    slot: "publishTime"
-  },
-  ...tableColumns.value.slice(7, 8)
-]);
+const songFormDetailColumns = useMusicStoreHook().songDetailFormColumns;
 
 /** 歌曲请求参数 */
 const songRequest = computed<SongParam>(() => ({
@@ -165,42 +85,10 @@ const songDialog = reactive<DialogOptions>({
   contentRenderer: () => (
     <SimpleForm
       formValue={songFormDetail}
-      formColumns={songFormDetailColumns.value}
+      formColumns={songFormDetailColumns}
       showButton={false}
       isFlex={false}
-      v-slots={{
-        albumName: () => (
-          <el-select
-            v-model={songFormDetail.albumId}
-            clearable={true}
-            placeholder="请选择专辑"
-          >
-            {song_albums.value.map(item => (
-              <el-option value={item.value} label={item.label} />
-            ))}
-          </el-select>
-        ),
-        singerName: () => (
-          <el-select
-            v-model={songFormDetail.singerIds}
-            multiple={true}
-            clearable={true}
-            placeholder="请选择歌手"
-          >
-            {song_singers.value.map(item => (
-              <el-option value={item.value} label={item.label} />
-            ))}
-          </el-select>
-        ),
-        publishTime: () => (
-          <el-date-picker
-            v-model={songFormDetail.publishTime}
-            type="date"
-            placeholder="发行日期"
-          />
-        )
-      }}
-    ></SimpleForm>
+    />
   ),
   beforeSure: async (done: Function) => {
     // 歌曲的新增与更新参数区别较大，新增时支持同时新增所属专辑与歌手
@@ -217,39 +105,37 @@ const songDialog = reactive<DialogOptions>({
   }
 });
 
-interface OptionValue {
-  label: string;
-  value: string | number;
-}
-
-/** 歌曲详情-歌手筛选项列表 */
-const song_singers = ref<Array<OptionValue>>([]);
-
 // singer的全量筛选项 挂载时触发
 async function querySingerLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getSingerLists(param as SingerParam);
-  song_singers.value = data.list.map(item => ({
-    value: item.id,
-    label: item.singerName
-  }));
+  for (let i = 0; i < songFormDetailColumns.length; i++) {
+    if (songFormDetailColumns[i].prop === "singerIds") {
+      songFormDetailColumns[i].options = data.list.map(item => ({
+        value: item.id,
+        label: item.singerName
+      }));
+      break;
+    }
+  }
 }
-
-/** 歌曲详情-专辑筛选项列表 */
-const song_albums = ref<Array<OptionValue>>([]);
 
 // album的全量筛选项 挂载时触发
 async function queryAlbumLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getAlbumLists(param as AlbumParam);
-  song_albums.value = data.list.map(item => ({
-    value: item.id,
-    label: item.albumName
-  }));
+  for (let i = 0; i < songFormDetailColumns.length; i++) {
+    if (songFormDetailColumns[i].prop === "albumId") {
+      songFormDetailColumns[i].options = data.list.map(item => ({
+        value: item.id,
+        label: item.albumName
+      }));
+      break;
+    }
+  }
 }
 
 /** 歌曲详情-专辑筛选项列表 */
-
 async function getLists(): Promise<void> {
   openLoading();
   try {
@@ -350,22 +236,7 @@ onMounted(() => {
       @reset="resetLists"
       @create="openDialog(songDialog)"
       @delete="batchDeleteLists"
-    >
-      <template #startPublishTime>
-        <el-date-picker
-          v-model="songForm.startPublishTime"
-          type="date"
-          placeholder="开始日期"
-        />
-      </template>
-      <template #endPublishTime>
-        <el-date-picker
-          v-model="songForm.endPublishTime"
-          type="date"
-          placeholder="截止日期"
-        />
-      </template>
-    </SimpleForm>
+    />
     <pure-table
       :loading="loading"
       :columns="tableColumns"

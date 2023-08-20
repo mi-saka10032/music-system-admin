@@ -1,21 +1,21 @@
 <script setup lang="ts">
 /**
  * @description 简单表单组件
- * 根据formColumns动态生成表单相关组件，默认生成el-input
+ * 根据formColumns动态生成表单相关组件
  * el-input默认与formValue绑定，键名是item.prop，请注意prop的声明
- * item.className存在额外排定，当item.className包含set_number时表示el-input应切换为number形式
- * 其余组件如select、datepicker请在item.slot中声明name并在外部使用插槽
+ * 表单内部的组件类型根据item.type来动态判断生成，请注意
+ * 当item.type === 'select' || 'multi_select' 时，注意为item.options填充静态or动态的筛选项数据
  * 功能按钮在下部点缀，如果需要位置调整，请使用deep穿透btn_box和btn_container来调整position
  * 最后isFlex表示是否将form行内排列，true则每行4等分排列，false则每个item一行排列
  */
-import type { TableColumnList } from "@/layout/hooks/useTable";
+import type { FormColumn } from "@/store/modules/music";
 
 defineOptions({
   name: "SimpleForm"
 });
 
 interface SimpleForm {
-  formColumns: TableColumnList;
+  formColumns: Array<FormColumn>;
   formValue: { [key: string]: any };
   showButton: boolean;
   isFlex: boolean;
@@ -47,11 +47,37 @@ const emit = defineEmits(["query", "reset", "create", "delete"]);
         </template>
         <template v-else>
           <el-input
-            v-if="item.className && item.className.includes('set_number')"
+            v-if="item.type === 'input'"
+            clearable
+            v-model="formValue[item.prop as string]"
+            :placeholder="item.placeholder || '请输入'"
+          />
+          <el-input
+            v-else-if="item.type === 'input_number'"
             clearable
             v-model.number="formValue[item.prop as string]"
+            :placeholder="item.placeholder || '请输入数字'"
           />
-          <el-input v-else clearable v-model="formValue[item.prop as string]" />
+          <el-date-picker
+            v-else-if="item.type === 'date'"
+            v-model="formValue[item.prop as string]"
+            type="date"
+            :placeholder="item.placeholder ?? '请选择'"
+          />
+          <el-select
+            v-else-if="item.type === 'select' || item.type === 'multi_select'"
+            v-model="formValue[item.prop as string]"
+            :multiple="item.type === 'multi_select'"
+            clearable
+            :placeholder="item.placeholder ?? '请选择'"
+          >
+            <el-option
+              v-for="(option, index) in item.options || []"
+              :key="index"
+              :value="option.value"
+              :label="option.label"
+            />
+          </el-select>
         </template>
       </el-form-item>
     </el-form>
