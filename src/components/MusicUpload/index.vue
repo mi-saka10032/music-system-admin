@@ -8,8 +8,8 @@
 <script setup lang="ts">
 import { shallowRef, ref, computed, watch } from "vue";
 import { formatToken, getToken } from "@/utils/auth";
-import { type UploadProps, ElLoading } from "element-plus";
 import { message } from "@/utils/message";
+import { type UploadProps, ElLoading } from "element-plus";
 import SystemResponse from "@/music-api/code/SystemResponse";
 import type { SongCreate } from "@/api/song";
 
