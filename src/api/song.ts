@@ -71,3 +71,10 @@ export const deleteSong = (id: number) => {
     params: { id }
   });
 };
+
+/** 批量创建歌曲信息，适用于上传解析生成的批量模板 */
+export const batchCreateSongs = (data: Array<SongCreate>) => {
+  return http.post<SystemResponse<SongResult>>(`${songPrefix}/batchCreate`, {
+    data
+  });
+};

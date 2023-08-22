@@ -14,7 +14,8 @@ import {
   getSongDetail,
   updateSong,
   createSong,
-  deleteSong
+  deleteSong,
+  batchCreateSongs
 } from "@/api/song";
 import { type SingerParam, getSingerLists } from "@/api/singer";
 import { type AlbumParam, getAlbumLists } from "@/api/album";
@@ -22,6 +23,8 @@ import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import MusicUpload from "@/components/MusicUpload/index.vue";
 import { message } from "@/utils/message";
+import { useScrollView } from "@/layout/hooks/useScrollView";
+import { Back, Right } from "@element-plus/icons-vue";
 
 defineOptions({
   name: "Song"
@@ -271,47 +274,77 @@ const embedFormColumns = reactive({
   singer: useMusicStoreHook().singerFormColumns
 });
 
+const { childrenLength, enablePrev, enableNext, prevTo, nextTo } =
+  useScrollView(".outer_form");
+
 /** 批量式模板歌曲新增详情弹窗 使用slot插槽制作内嵌歌手表格单和专辑表单 */
 const batchTemplateSongsDialog = reactive<DialogOptions>({
   title: "批量新增歌曲信息",
   contentRenderer: () => (
-    <div>
-      {batchTemplateNewSongs.value.map(item => (
-        <SimpleForm
-          class="outer_form"
-          formValue={item}
-          formColumns={batchTemplateSongsFormColumns}
-          showButton={false}
-          isFlex={false}
-          v-slots={{
-            embedAlbum: () => (
-              <SimpleForm
-                class="embed_album"
-                formValue={item.album}
-                formColumns={embedFormColumns.album}
-                showButton={false}
-                isFlex={false}
-              />
-            ),
-            embedSinger: () => (
-              <SimpleForm
-                class="embed_singer"
-                formValue={item.singer}
-                formColumns={embedFormColumns.singer}
-                showButton={false}
-                isFlex={false}
-              />
-            )
-          }}
-        />
-      ))}
-    </div>
-  )
+    <>
+      <div class="outer_form flex overflow-x-scroll">
+        {batchTemplateNewSongs.value.map(item => (
+          <SimpleForm
+            class="grow-0 shrink-0 basis-full"
+            formValue={item}
+            formColumns={batchTemplateSongsFormColumns}
+            showButton={false}
+            isFlex={false}
+          >
+            {{
+              embedAlbum: () => (
+                <SimpleForm
+                  class="embed_album w-full"
+                  formValue={item.album}
+                  formColumns={embedFormColumns.album}
+                  showButton={false}
+                  isFlex={false}
+                />
+              ),
+              embedSinger: () => (
+                <SimpleForm
+                  class="embed_singer w-full"
+                  formValue={item.singer}
+                  formColumns={embedFormColumns.singer}
+                  showButton={false}
+                  isFlex={false}
+                />
+              )
+            }}
+          </SimpleForm>
+        ))}
+      </div>
+      {batchTemplateNewSongs.value.length > 1 ? (
+        <div class="flex justify-center items-center mt-1">
+          <el-button
+            icon={Back}
+            disabled={!enablePrev.value}
+            onClick={prevTo}
+          />
+          <el-button
+            icon={Right}
+            disabled={!enableNext.value}
+            onClick={nextTo}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
+  ),
+  beforeSure: async (done: Function) => {
+    await batchCreateSongs(batchTemplateNewSongs.value);
+    message("批量新增成功", { type: "success" });
+    done();
+    getLists();
+  }
 });
 
 /** 上传组件生成的新增歌曲信息模板列表回调，生成批量式新增模板弹窗 */
 function generateNewSongs(templateSongs: Array<SongCreate>) {
   batchTemplateNewSongs.value = templateSongs;
+  // 为scrollView子元素可滚动长度赋值
+  childrenLength.value = batchTemplateNewSongs.value.length;
   addDialog(batchTemplateSongsDialog);
 }
 
@@ -364,11 +397,13 @@ onMounted(() => {
 
   .embed_album,
   .embed_singer {
-    width: 100%;
-
     .el-form-item:not(:last-child) {
       margin-bottom: 1rem;
     }
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 </style>
