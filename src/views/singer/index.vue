@@ -54,7 +54,7 @@ tableColumns.value = useMusicStoreHook().singerTableColumns;
 /** 歌手表单配置 */
 const singerFormColumns = useMusicStoreHook().singerFormColumns;
 
-/** 歌手请求参数 */
+/** 歌手列表查询请求参数 */
 const singerRequest = computed<SingerParam>(() => ({
   singerName: singerForm.singerName,
   coverUrl: singerForm.coverUrl,

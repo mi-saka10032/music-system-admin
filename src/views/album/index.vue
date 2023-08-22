@@ -59,7 +59,7 @@ const albumFormColumns = useMusicStoreHook().albumQueryFormColumns;
 /** 专辑表单详情配置 与上面的查询用表单配置略有区别 */
 const albumFormDetailColumns = useMusicStoreHook().albumDetailFormColumns;
 
-/** 专辑请求参数 */
+/** 专辑列表查询请求参数 */
 const albumRequest = computed<AlbumParam>(() => ({
   albumName: albumForm.albumName,
   coverUrl: albumForm.coverUrl,

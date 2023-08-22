@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { useTable } from "@/layout/hooks/useTable";
-import { reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useMusicStoreHook } from "@/store/modules/music";
 import type {
   SongForm,
@@ -64,7 +64,7 @@ const songFormDetailColumns = useMusicStoreHook().songDetailFormColumns;
 /** 歌曲新增表单详情配置 */
 const songFormCreateColumn = useMusicStoreHook().songCreateFormColumns;
 
-/** 歌曲请求参数 */
+/** 歌曲列表查询请求参数 */
 const songRequest = computed<SongParam>(() => ({
   songName: songForm.songName,
   lyric: songForm.lyric,
@@ -127,7 +127,7 @@ const songFormCreate = reactive<SongCreate>({
   singerId: null
 });
 
-/** 歌曲新增详情表单 */
+/** 歌曲新增详情弹窗 */
 const songCreateDialog = reactive<DialogOptions>({
   title: "新增歌曲",
   contentRenderer: () => (
@@ -146,7 +146,7 @@ const songCreateDialog = reactive<DialogOptions>({
   }
 });
 
-// singer的全量筛选项 挂载时触发
+/** singer的全量筛选项 挂载时触发 */
 async function querySingerLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getSingerLists(param as SingerParam);
@@ -168,7 +168,7 @@ async function querySingerLists(): Promise<void> {
   }
 }
 
-// album的全量筛选项 挂载时触发
+/** album的全量筛选项 挂载时触发 */
 async function queryAlbumLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
   const { data } = await getAlbumLists(param as AlbumParam);
@@ -258,6 +258,63 @@ async function batchDeleteLists() {
   }
 }
 
+/** 批量式模板新增歌曲列表 */
+const batchTemplateNewSongs = ref<Array<SongCreate>>([]);
+
+/** 批量式模板歌曲新增表单详情配置 */
+const batchTemplateSongsFormColumns =
+  useMusicStoreHook().templateSongCreateFormColumns;
+
+/** 内嵌歌手 内嵌专辑 表单详情配置 */
+const embedFormColumns = reactive({
+  album: useMusicStoreHook().albumDetailFormColumns,
+  singer: useMusicStoreHook().singerFormColumns
+});
+
+/** 批量式模板歌曲新增详情弹窗 使用slot插槽制作内嵌歌手表格单和专辑表单 */
+const batchTemplateSongsDialog = reactive<DialogOptions>({
+  title: "批量新增歌曲信息",
+  contentRenderer: () => (
+    <div>
+      {batchTemplateNewSongs.value.map(item => (
+        <SimpleForm
+          class="outer_form"
+          formValue={item}
+          formColumns={batchTemplateSongsFormColumns}
+          showButton={false}
+          isFlex={false}
+          v-slots={{
+            embedAlbum: () => (
+              <SimpleForm
+                class="embed_album"
+                formValue={item.album}
+                formColumns={embedFormColumns.album}
+                showButton={false}
+                isFlex={false}
+              />
+            ),
+            embedSinger: () => (
+              <SimpleForm
+                class="embed_singer"
+                formValue={item.singer}
+                formColumns={embedFormColumns.singer}
+                showButton={false}
+                isFlex={false}
+              />
+            )
+          }}
+        />
+      ))}
+    </div>
+  )
+});
+
+/** 上传组件生成的新增歌曲信息模板列表回调，生成批量式新增模板弹窗 */
+function generateNewSongs(templateSongs: Array<SongCreate>) {
+  batchTemplateNewSongs.value = templateSongs;
+  addDialog(batchTemplateSongsDialog);
+}
+
 onMounted(() => {
   getLists();
   querySingerLists();
@@ -277,7 +334,7 @@ onMounted(() => {
       @create="openDialog(songCreateDialog)"
       @delete="batchDeleteLists"
     />
-    <MusicUpload />
+    <MusicUpload @generate-new-songs="generateNewSongs" />
     <pure-table
       :loading="loading"
       :columns="tableColumns"
@@ -297,3 +354,21 @@ onMounted(() => {
     </pure-table>
   </div>
 </template>
+
+<!-- 处理内嵌SimpleForm的样式优化 -->
+<style lang="scss">
+.outer_form {
+  .el-form-item__label {
+    font-weight: 700;
+  }
+
+  .embed_album,
+  .embed_singer {
+    width: 100%;
+
+    .el-form-item:not(:last-child) {
+      margin-bottom: 1rem;
+    }
+  }
+}
+</style>

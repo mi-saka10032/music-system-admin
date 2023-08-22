@@ -11,7 +11,7 @@ const emit = defineEmits(["inline-edit", "inline-delete"]);
   <el-button link type="primary" @click="emit('inline-edit')">编辑</el-button>
   <el-popconfirm title="是否确认删除" @confirm="emit('inline-delete')">
     <template #reference>
-      <el-button link type="primary">删除</el-button>
+      <el-button link type="danger">删除</el-button>
     </template>
   </el-popconfirm>
 </template>

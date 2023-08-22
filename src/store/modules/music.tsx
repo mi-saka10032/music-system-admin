@@ -36,6 +36,9 @@ export interface MusicState {
 export interface MusicGetters {
   [key: string]: any;
   songCreateFormColumns: (state: UnwrapRef<MusicState>) => Array<FormColumn>;
+  templateSongCreateFormColumns: (
+    state: UnwrapRef<MusicState>
+  ) => Array<FormColumn>;
 }
 
 export const useMusicStore = defineStore<
@@ -312,7 +315,7 @@ export const useMusicStore = defineStore<
   getters: {
     // 歌曲新增详情表单配置，新增歌手简化为单选模式
     songCreateFormColumns: state => {
-      const columns = cloneDeep(state.songDetailFormColumns);
+      const columns: Array<FormColumn> = cloneDeep(state.songDetailFormColumns);
       columns.splice(4, 1, {
         type: "select",
         label: "新增歌手",
@@ -320,6 +323,27 @@ export const useMusicStore = defineStore<
         options: [],
         placeholder: "请选择歌手"
       });
+      return columns;
+    },
+    // 模板歌曲新增详情表单配置，新增歌手和新增专辑变更为 歌手和专辑 的表单配置 空出slot插槽
+    templateSongCreateFormColumns: state => {
+      const columns: Array<FormColumn> = cloneDeep(state.songDetailFormColumns);
+      columns.splice(
+        3,
+        2,
+        {
+          type: "slot",
+          label: "新增专辑表单",
+          prop: "embedAlbum",
+          slot: "embedAlbum"
+        },
+        {
+          type: "slot",
+          label: "新增歌手表单",
+          prop: "embedSinger",
+          slot: "embedSinger"
+        }
+      );
       return columns;
     }
   }

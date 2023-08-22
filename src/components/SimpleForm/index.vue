@@ -92,7 +92,7 @@ const confirmDelete = async () => {
         </template>
       </el-form-item>
     </el-form>
-    <div class="btn_container flex justify-end mb-4">
+    <div v-if="showButton" class="btn_container flex justify-end mb-4">
       <el-button type="success" @click="emit('query')">查询</el-button>
       <el-button type="primary" @click="emit('reset')">重置</el-button>
       <el-button type="warning" @click="emit('create')">新增</el-button>
