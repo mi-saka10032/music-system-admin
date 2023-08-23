@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { useTable } from "@/layout/hooks/useTable";
+import { useTable } from "@/hooks/useTable";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useMusicStoreHook } from "@/store/modules/music";
 import type {
@@ -23,7 +23,7 @@ import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import MusicUpload from "@/components/MusicUpload/index.vue";
 import { message } from "@/utils/message";
-import { useScrollView } from "@/layout/hooks/useScrollView";
+import { useScrollView } from "@/hooks/useScrollView";
 import { Back, Right } from "@element-plus/icons-vue";
 
 defineOptions({

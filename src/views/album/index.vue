@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { useTable } from "@/layout/hooks/useTable";
+import { useTable } from "@/hooks/useTable";
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { useMusicStoreHook } from "@/store/modules/music";
 import { emitter } from "@/utils/mitt";

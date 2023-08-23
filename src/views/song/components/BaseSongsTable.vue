@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { useTable } from "@/layout/hooks/useTable";
+import { useTable } from "@/hooks/useTable";
 import type { BaseSongResult } from "@/api/song";
 import { onMounted } from "vue";
 import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
