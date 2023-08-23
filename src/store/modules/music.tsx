@@ -63,7 +63,11 @@ export interface MusicGetters {
   ) => FormColumnTypeList<SongCreate>;
 }
 
-export const useMusicStore = defineStore<MusicStoreId, MusicState, MusicGetters>({
+export const useMusicStore = defineStore<
+  MusicStoreId,
+  MusicState,
+  MusicGetters
+>({
   id: "admin-music",
   state: () => ({
     // 歌手表格配置

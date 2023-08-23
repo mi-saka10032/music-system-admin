@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
+import { reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { useTable } from "@/hooks/useTable";
 import { useCreate, useRead, useUpdate, useDelete } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
@@ -17,11 +17,10 @@ import {
   createSinger,
   deleteSinger
 } from "@/api/singer";
-import type { BaseSongResult } from "@/api/song";
 import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import ReCol from "@/components/ReCol";
-import BaseSongsTable from "@/views/song/components/BaseSongsTable.vue";
+import RelatedSongsTable from "@/views/song/components/RelatedSongsTable.vue";
 
 defineOptions({
   name: "Singer"
@@ -121,11 +120,8 @@ const editDialog = reactive<DialogOptions>({
   }
 });
 
-/** 歌手详情-关联歌曲列表 */
-const singerSongs = ref<Array<BaseSongResult>>([]);
-
 /** 歌手详情-关联歌曲弹窗 */
-const singerSongsDialog = reactive<DialogOptions>({
+const relatedDialog = reactive<DialogOptions>({
   title: "歌手-关联歌曲详情",
   contentRenderer: () => (
     <div>
@@ -133,9 +129,10 @@ const singerSongsDialog = reactive<DialogOptions>({
         <ReCol value={12}>歌手ID：{updateForm.id}</ReCol>
         <ReCol value={12}>歌手名称：{updateForm.singerName}</ReCol>
       </el-row>
-      <BaseSongsTable baseSongs={singerSongs.value} />
+      <RelatedSongsTable relatedId={updateForm.id} relation="singer" />
     </div>
-  )
+  ),
+  footerRenderer: () => <div></div>
 });
 
 /** 查询歌手列表 */
@@ -179,12 +176,11 @@ async function batchDeleteLists() {
 /** 打开歌手新增弹窗 */
 function openCreateDialog(): void {
   resetCreateForm();
-  singerSongs.value = [];
   addDialog(createDialog);
 }
 
 /** 打开歌手编辑弹窗 / 或者是歌手-关联歌曲信息弹窗 */
-async function openUpdateDialog(
+async function openEditDialog(
   dialog: DialogOptions,
   id: number
 ): Promise<void> {
@@ -193,14 +189,13 @@ async function openUpdateDialog(
   updateForm.id = data.id;
   updateForm.singerName = data.singerName;
   updateForm.coverUrl = data.coverUrl;
-  singerSongs.value = data.songs;
   addDialog(dialog);
 }
 
 onMounted(() => {
   getLists();
   emitter.on("openSingerSongsDialog", id => {
-    openUpdateDialog(singerSongsDialog, Number(id));
+    openEditDialog(relatedDialog, Number(id));
   });
 });
 
@@ -233,7 +228,7 @@ onBeforeUnmount(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openUpdateDialog(editDialog, row.id as number)"
+          @inline-edit="openEditDialog(editDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

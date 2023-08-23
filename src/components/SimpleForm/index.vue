@@ -51,7 +51,7 @@ const confirmDelete = async () => {
         :key="index"
         :label="item.label"
         :value="item.prop"
-        :class="isFlex ? 'w-[25%] max-w-lg balance_date !mr-0 pr-5' : ''"
+        :class="isFlex ? 'w-[25%] balance_date !mr-0 pr-5' : ''"
       >
         <template v-if="item.type === 'slot' && item.slot">
           <slot :name="String(item.slot)" />

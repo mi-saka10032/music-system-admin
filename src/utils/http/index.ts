@@ -69,10 +69,10 @@ class PureHttp {
       async (config: PureHttpRequestConfig): Promise<any> => {
         // 开启进度条动画
         NProgress.start();
-        // 滤除body参数data中作为空字符串 null undefined的部分
+        // 滤除body参数data中作为空字符串 null的部分
         if (typeof config.data === "object") {
           Object.keys(config.data).forEach((key: string) => {
-            if (!config.data[key]) {
+            if (config.data[key] === "" || config.data[key] === null) {
               delete config.data[key];
             }
           });

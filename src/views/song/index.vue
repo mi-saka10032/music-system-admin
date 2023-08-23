@@ -203,7 +203,7 @@ async function getLists(): Promise<void> {
   openLoading();
   try {
     const { data } = await getSongLists(songQueryParam.value);
-    const list: Array<SongResult> = data.list;
+    const list = data.list;
     tableData.value = list;
     pagination.total = data.total;
   } catch (error: any) {
