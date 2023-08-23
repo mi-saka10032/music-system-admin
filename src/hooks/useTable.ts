@@ -60,6 +60,12 @@ export function useTable<T extends BaseT>() {
     typeof cb === "function" && cb();
   }
 
+  // 重置分页数据
+  function resetPagination() {
+    pagination.currentPage = ORIGIN_CURRENT_PAGE;
+    pagination.pageSize = ORIGIN_PAGE_SIZE;
+  }
+
   return {
     ORIGIN_CURRENT_PAGE,
     ORIGIN_PAGE_SIZE,
@@ -72,6 +78,7 @@ export function useTable<T extends BaseT>() {
     closeLoading,
     injectCheckedIds,
     handleCurrentPageChange,
-    handlePageSizeChange
+    handlePageSizeChange,
+    resetPagination
   };
 }

@@ -1,10 +1,13 @@
-import { type UnwrapRef } from "vue";
 import { store } from "@/store";
 import { defineStore } from "pinia";
 import { emitter } from "@/utils/mitt";
 import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 import { cloneDeep } from "@pureadmin/utils";
-import type { SongResult } from "@/api/song";
+import { type UnwrapRef } from "vue";
+import type { TableColumns } from "@pureadmin/table";
+import type { SingerResult, SingerForm } from "@/api/singer";
+import type { AlbumResult, AlbumForm, AlbumDetail } from "@/api/album";
+import type { SongResult, SongForm, SongDetail, SongCreate } from "@/api/song";
 
 type MusicStoreId = "admin-music";
 
@@ -22,30 +25,40 @@ export interface FormColumn {
   slot?: string;
 }
 
+/** 强约束FormColumn的prop项，避免错误渲染 */
+export type FormColumnTypeList<T extends Object> = Array<
+  FormColumn & { prop: keyof T }
+>;
+
+/** 强约束TableColumn的prop项，避免错误渲染 */
+export type TableColumnTypeList<T extends Object> = Array<
+  TableColumns & { prop?: keyof T }
+>;
+
+/** 强约束所有Columns配置项prop字段 */
 export interface MusicState {
-  singerTableColumns: TableColumnList;
-  singerFormColumns: Array<FormColumn>;
-  albumTableColumns: TableColumnList;
-  albumQueryFormColumns: Array<FormColumn>;
-  albumDetailFormColumns: Array<FormColumn>;
-  songTableColumns: TableColumnList;
-  songQueryFormColumns: Array<FormColumn>;
-  songDetailFormColumns: Array<FormColumn>;
+  singerTableColumns: TableColumnTypeList<SingerResult>;
+  singerFormColumns: FormColumnTypeList<SingerForm>;
+  albumTableColumns: TableColumnTypeList<AlbumResult>;
+  albumQueryFormColumns: FormColumnTypeList<AlbumForm>;
+  albumDetailFormColumns: FormColumnTypeList<AlbumDetail>;
+  songTableColumns: TableColumnTypeList<SongResult>;
+  songQueryFormColumns: FormColumnTypeList<SongForm>;
+  songDetailFormColumns: FormColumnTypeList<SongDetail>;
 }
 
+/** 强约束所有Columns配置项prop字段 */
 export interface MusicGetters {
   [key: string]: any;
-  songCreateFormColumns: (state: UnwrapRef<MusicState>) => Array<FormColumn>;
+  songCreateFormColumns: (
+    state: UnwrapRef<MusicState>
+  ) => FormColumnTypeList<SongCreate>;
   templateSongCreateFormColumns: (
     state: UnwrapRef<MusicState>
-  ) => Array<FormColumn>;
+  ) => FormColumnTypeList<SongCreate>;
 }
 
-export const useMusicStore = defineStore<
-  MusicStoreId,
-  MusicState,
-  MusicGetters
->({
+export const useMusicStore = defineStore<MusicStoreId, MusicState, MusicGetters>({
   id: "admin-music",
   state: () => ({
     // 歌手表格配置
@@ -198,12 +211,12 @@ export const useMusicStore = defineStore<
       },
       {
         label: "所属专辑",
-        prop: "albumName",
+        prop: "album",
         cellRenderer: ({ row }) => <>{(row as SongResult).album?.albumName}</>
       },
       {
         label: "歌手",
-        prop: "singerName",
+        prop: "singers",
         cellRenderer: ({ row }) => (
           <div class="flex flex-wrap">
             {(row as SongResult).singers.map(singer => (
@@ -239,11 +252,6 @@ export const useMusicStore = defineStore<
         type: "input",
         label: "歌词",
         prop: "lyric"
-      },
-      {
-        type: "input",
-        label: "链接",
-        prop: "musicUrl"
       },
       {
         type: "input",
@@ -315,7 +323,9 @@ export const useMusicStore = defineStore<
   getters: {
     // 歌曲新增详情表单配置，新增歌手简化为单选模式
     songCreateFormColumns: state => {
-      const columns: Array<FormColumn> = cloneDeep(state.songDetailFormColumns);
+      const columns: FormColumnTypeList<SongCreate> = cloneDeep(
+        state.songDetailFormColumns
+      );
       columns.splice(4, 1, {
         type: "select",
         label: "新增歌手",
@@ -327,20 +337,22 @@ export const useMusicStore = defineStore<
     },
     // 模板歌曲新增详情表单配置，新增歌手和新增专辑变更为 歌手和专辑 的表单配置 空出slot插槽
     templateSongCreateFormColumns: state => {
-      const columns: Array<FormColumn> = cloneDeep(state.songDetailFormColumns);
+      const columns: FormColumnTypeList<SongCreate> = cloneDeep(
+        state.songDetailFormColumns
+      );
       columns.splice(
         3,
         2,
         {
           type: "slot",
           label: "新增专辑表单",
-          prop: "embedAlbum",
+          prop: "album",
           slot: "embedAlbum"
         },
         {
           type: "slot",
           label: "新增歌手表单",
-          prop: "embedSinger",
+          prop: "singer",
           slot: "embedSinger"
         }
       );

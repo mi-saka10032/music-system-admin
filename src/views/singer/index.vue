@@ -1,6 +1,7 @@
 <script setup lang="tsx">
-import { useTable } from "@/hooks/useTable";
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
+import { useTable } from "@/hooks/useTable";
+import { useCreate, useRead, useUpdate, useDelete } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
 import { emitter } from "@/utils/mitt";
 import type {
@@ -21,15 +22,12 @@ import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import ReCol from "@/components/ReCol";
 import BaseSongsTable from "@/views/song/components/BaseSongsTable.vue";
-import { message } from "@/utils/message";
 
 defineOptions({
   name: "Singer"
 });
 
 const {
-  ORIGIN_CURRENT_PAGE,
-  ORIGIN_PAGE_SIZE,
   loading,
   tableColumns,
   tableData,
@@ -39,83 +37,112 @@ const {
   closeLoading,
   injectCheckedIds,
   handleCurrentPageChange,
-  handlePageSizeChange
+  handlePageSizeChange,
+  resetPagination
 } = useTable<SingerResult>();
 
-/** 歌手表单 */
-const singerForm = reactive<SingerForm>({
-  singerName: "",
-  coverUrl: ""
-});
+const { queryForm, queryFormColumns, resetQueryForm } = useRead<SingerForm>(
+  {
+    singerName: "",
+    coverUrl: ""
+  },
+  useMusicStoreHook().singerFormColumns
+);
+
+const { createForm, createFormColumns, resetCreateForm, createSuccessMsg } =
+  useCreate<SingerDetail>(
+    {
+      id: null,
+      singerName: "",
+      coverUrl: ""
+    },
+    useMusicStoreHook().singerFormColumns
+  );
+
+const { updateForm, updateFormColumns, resetUpdateForm, updateSuccessMsg } =
+  useUpdate<SingerDetail>(
+    {
+      id: null,
+      singerName: "",
+      coverUrl: ""
+    },
+    useMusicStoreHook().singerFormColumns
+  );
+
+const { deleteSuccessMsg, deleteNoCheckedMsg } = useDelete();
 
 /** 歌手表格配置 */
 tableColumns.value = useMusicStoreHook().singerTableColumns;
 
-/** 歌手表单配置 */
-const singerFormColumns = useMusicStoreHook().singerFormColumns;
-
 /** 歌手列表查询请求参数 */
-const singerRequest = computed<SingerParam>(() => ({
-  singerName: singerForm.singerName,
-  coverUrl: singerForm.coverUrl,
+const singerQueryParam = computed<SingerParam>(() => ({
+  singerName: queryForm.singerName,
+  coverUrl: queryForm.coverUrl,
   pageNo: pagination.currentPage,
   pageSize: pagination.pageSize
 }));
 
-/** 歌手详情表单 */
-const singerFormDetail = reactive<SingerDetail>({
-  id: null,
-  singerName: "",
-  coverUrl: ""
-});
-
-/** 歌手详情弹窗 */
-const singerDialog = reactive<DialogOptions>({
-  title: "歌手详情",
+/** 歌手新增详情弹窗 */
+const createDialog = reactive<DialogOptions>({
+  title: "歌手信息新增",
   contentRenderer: () => (
     <SimpleForm
-      formValue={singerFormDetail}
-      formColumns={singerFormColumns}
+      formValue={createForm}
+      formColumns={createFormColumns}
       showButton={false}
       isFlex={false}
     />
   ),
   beforeSure: async (done: Function) => {
-    if (singerFormDetail.id && singerFormDetail.id !== 0) {
-      await updateSinger(singerFormDetail);
-      message("修改成功", { type: "success" });
-    } else {
-      await createSinger(singerFormDetail);
-      message("新增成功", { type: "success" });
-    }
+    await createSinger(createForm);
+    createSuccessMsg();
     done();
     getLists();
   }
 });
 
-/** 歌手详情-歌曲列表 */
+/** 歌手编辑详情弹窗 */
+const updateDialog = reactive<DialogOptions>({
+  title: "歌手信息编辑",
+  contentRenderer: () => (
+    <SimpleForm
+      formValue={updateForm}
+      formColumns={updateFormColumns}
+      showButton={false}
+      isFlex={false}
+    />
+  ),
+  beforeSure: async (done: Function) => {
+    await updateSinger(updateForm);
+    updateSuccessMsg();
+    done();
+    getLists();
+  }
+});
+
+/** 歌手详情-关联歌曲列表 */
 const singerSongs = ref<Array<BaseSongResult>>([]);
 
-/** 歌手详情-歌曲弹窗 */
+/** 歌手详情-关联歌曲弹窗 */
 const singerSongsDialog = reactive<DialogOptions>({
-  title: "歌手-歌曲详情",
+  title: "歌手-关联歌曲详情",
   contentRenderer: () => (
     <div>
       <el-row class="mt-5 mb-5">
-        <ReCol value={12}>歌手ID：{singerFormDetail.id}</ReCol>
-        <ReCol value={12}>歌手名称：{singerFormDetail.singerName}</ReCol>
+        <ReCol value={12}>歌手ID：{updateForm.id}</ReCol>
+        <ReCol value={12}>歌手名称：{updateForm.singerName}</ReCol>
       </el-row>
       <BaseSongsTable baseSongs={singerSongs.value} />
     </div>
   )
 });
 
+/** 查询歌手列表 */
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data } = await getSingerLists(singerRequest.value);
-    const list: Array<SingerResult> = data.list;
-    tableData.value = list;
+    const { data } = await getSingerLists(singerQueryParam.value);
+    tableData.value = data.list;
     pagination.total = data.total;
   } catch (error: any) {
     console.log(error);
@@ -123,53 +150,56 @@ async function getLists(): Promise<void> {
   closeLoading();
 }
 
+/** 重置查询歌手列表 */
 function resetLists(): void {
-  singerForm.singerName = "";
-  singerForm.coverUrl = "";
-  pagination.currentPage = ORIGIN_CURRENT_PAGE;
-  pagination.pageSize = ORIGIN_PAGE_SIZE;
+  resetQueryForm();
+  resetPagination();
   getLists();
 }
 
+/** 删除歌手信息 */
 async function deleteList(id: number): Promise<void> {
   await deleteSinger(id);
-  message("删除成功", { type: "success" });
+  deleteSuccessMsg();
   getLists();
 }
 
-async function openDialog(
-  dialogOption: DialogOptions,
-  id?: number
-): Promise<void> {
-  if (id && id !== 0) {
-    const { data } = await getSingerDetail(id);
-    singerFormDetail.id = data.id;
-    singerFormDetail.singerName = data.singerName;
-    singerFormDetail.coverUrl = data.coverUrl;
-    singerSongs.value = data.songs;
-  } else {
-    singerFormDetail.id = 0;
-    singerFormDetail.singerName = "";
-    singerFormDetail.coverUrl = "";
-    singerSongs.value = [];
-  }
-  addDialog(dialogOption);
-}
-
+/** 批量删除歌手信息 */
 async function batchDeleteLists() {
   if (checkedIds.value.length > 0) {
     await Promise.all(checkedIds.value.map(id => deleteSinger(id)));
-    message("删除成功", { type: "success" });
+    deleteSuccessMsg();
     getLists();
   } else {
-    message("当前无选中项", { type: "error" });
+    deleteNoCheckedMsg();
   }
+}
+
+/** 打开歌手新增弹窗 */
+function openCreateDialog(): void {
+  resetCreateForm();
+  singerSongs.value = [];
+  addDialog(createDialog);
+}
+
+/** 打开歌手编辑弹窗 / 或者是歌手-关联歌曲信息弹窗 */
+async function openUpdateDialog(
+  dialog: DialogOptions,
+  id: number
+): Promise<void> {
+  resetUpdateForm();
+  const { data } = await getSingerDetail(id);
+  updateForm.id = data.id;
+  updateForm.singerName = data.singerName;
+  updateForm.coverUrl = data.coverUrl;
+  singerSongs.value = data.songs;
+  addDialog(dialog);
 }
 
 onMounted(() => {
   getLists();
   emitter.on("openSingerSongsDialog", id => {
-    openDialog(singerSongsDialog, Number(id));
+    openUpdateDialog(singerSongsDialog, Number(id));
   });
 });
 
@@ -181,13 +211,13 @@ onBeforeUnmount(() => {
 <template>
   <div>
     <SimpleForm
-      :form-value="singerForm"
-      :form-columns="singerFormColumns"
+      :form-value="queryForm"
+      :form-columns="queryFormColumns"
       :show-button="true"
       :is-flex="true"
       @query="getLists"
       @reset="resetLists"
-      @create="openDialog(singerDialog)"
+      @create="openCreateDialog"
       @delete="batchDeleteLists"
     />
     <pure-table
@@ -202,7 +232,7 @@ onBeforeUnmount(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openDialog(singerDialog, row.id as number)"
+          @inline-edit="openUpdateDialog(updateDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

@@ -1,6 +1,7 @@
 <script setup lang="tsx">
-import { useTable } from "@/hooks/useTable";
 import { ref, reactive, computed, onMounted } from "vue";
+import { useTable } from "@/hooks/useTable";
+import { useCreate, useRead, useUpdate, useDelete } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
 import type {
   SongForm,
@@ -22,7 +23,6 @@ import { type AlbumParam, getAlbumLists } from "@/api/album";
 import { type DialogOptions, addDialog } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
 import MusicUpload from "@/components/MusicUpload/index.vue";
-import { message } from "@/utils/message";
 import { useScrollView } from "@/hooks/useScrollView";
 import { Back, Right } from "@element-plus/icons-vue";
 
@@ -31,8 +31,6 @@ defineOptions({
 });
 
 const {
-  ORIGIN_CURRENT_PAGE,
-  ORIGIN_PAGE_SIZE,
   loading,
   tableColumns,
   tableData,
@@ -42,108 +40,115 @@ const {
   closeLoading,
   injectCheckedIds,
   handleCurrentPageChange,
-  handlePageSizeChange
+  handlePageSizeChange,
+  resetPagination
 } = useTable<SongResult>();
 
-/** 歌曲表单 */
-const songForm = reactive<SongForm>({
-  songName: "",
-  lyric: "",
-  startPublishTime: null,
-  endPublishTime: null,
-  albumName: "",
-  singerName: ""
-});
+const { queryForm, queryFormColumns, resetQueryForm } = useRead<SongForm>(
+  {
+    songName: "",
+    lyric: "",
+    startPublishTime: null,
+    endPublishTime: null,
+    albumName: "",
+    singerName: ""
+  },
+  useMusicStoreHook().songQueryFormColumns
+);
+
+const {
+  createForm,
+  createFormColumns,
+  resetCreateForm,
+  createSuccessMsg,
+  batchCreateSuccessMsg
+} = useCreate<SongCreate>(
+  {
+    songName: "",
+    duration: 0,
+    lyric: "",
+    musicUrl: "",
+    publishTime: null,
+    album: {
+      albumName: "",
+      coverUrl: "",
+      publishTime: null
+    },
+    singer: {
+      singerName: "",
+      coverUrl: ""
+    },
+    albumId: null,
+    singerId: null
+  },
+  useMusicStoreHook().songCreateFormColumns
+);
+
+const { updateForm, updateFormColumns, resetUpdateForm, updateSuccessMsg } =
+  useUpdate<SongDetail>(
+    {
+      id: null,
+      songName: "",
+      duration: 0,
+      lyric: "",
+      musicUrl: "",
+      publishTime: null,
+      albumId: null,
+      singerIds: []
+    },
+    useMusicStoreHook().songDetailFormColumns
+  );
+
+const { deleteSuccessMsg, deleteNoCheckedMsg } = useDelete();
 
 /** 歌曲表格配置 */
 tableColumns.value = useMusicStoreHook().songTableColumns;
 
-/** 歌曲查询表单配置 */
-const songFormColumns = useMusicStoreHook().songQueryFormColumns;
-
-/** 歌曲表单详情配置 与上面的查询用表单略有区别 */
-const songFormDetailColumns = useMusicStoreHook().songDetailFormColumns;
-
-/** 歌曲新增表单详情配置 */
-const songFormCreateColumn = useMusicStoreHook().songCreateFormColumns;
-
 /** 歌曲列表查询请求参数 */
-const songRequest = computed<SongParam>(() => ({
-  songName: songForm.songName,
-  lyric: songForm.lyric,
-  startPublishTime: songForm.startPublishTime,
-  endPublishTime: songForm.endPublishTime,
-  albumName: songForm.albumName,
-  singerName: songForm.singerName,
+const songQueryParam = computed<SongParam>(() => ({
+  songName: queryForm.songName,
+  lyric: queryForm.lyric,
+  startPublishTime: queryForm.startPublishTime,
+  endPublishTime: queryForm.endPublishTime,
+  albumName: queryForm.albumName,
+  singerName: queryForm.singerName,
   pageNo: pagination.currentPage,
   pageSize: pagination.pageSize
 }));
 
-/** 歌曲编辑详情表单 */
-const songFormDetail = reactive<SongDetail>({
-  id: null,
-  songName: "",
-  duration: 0,
-  lyric: "",
-  musicUrl: "",
-  publishTime: null,
-  albumId: null,
-  singerIds: []
-});
-
-/** 歌曲编辑详情弹窗 */
-const songDetailDialog = reactive<DialogOptions>({
-  title: "歌曲详情",
+/** 歌曲新增详情弹窗 */
+const createDialog = reactive<DialogOptions>({
+  title: "歌曲信息新增",
   contentRenderer: () => (
     <SimpleForm
-      formValue={songFormDetail}
-      formColumns={songFormDetailColumns}
+      formValue={createForm}
+      formColumns={createFormColumns}
       showButton={false}
       isFlex={false}
     />
   ),
   beforeSure: async (done: Function) => {
-    await updateSong(songFormDetail);
-    message("修改成功", { type: "success" });
+    await createSong(createForm);
+    createSuccessMsg();
     done();
     getLists();
   }
 });
 
-/** 歌曲新增详情表单 */
-const songFormCreate = reactive<SongCreate>({
-  songName: "",
-  duration: 0,
-  lyric: "",
-  musicUrl: "",
-  publishTime: null,
-  album: {
-    albumName: "",
-    coverUrl: "",
-    publishTime: null
-  },
-  singer: {
-    singerName: "",
-    coverUrl: ""
-  },
-  albumId: null,
-  singerId: null
-});
-
-/** 歌曲新增详情弹窗 */
-const songCreateDialog = reactive<DialogOptions>({
-  title: "新增歌曲",
+/** 歌曲编辑详情弹窗 */
+const updateDialog = reactive<DialogOptions>({
+  title: "歌曲信息编辑",
   contentRenderer: () => (
     <SimpleForm
-      formValue={songFormCreate}
-      formColumns={songFormCreateColumn}
+      formValue={updateForm}
+      formColumns={updateFormColumns}
       showButton={false}
       isFlex={false}
     />
   ),
   beforeSure: async (done: Function) => {
-    await createSong(songFormCreate);
-    message("新增成功", { type: "success" });
+    await updateSong(updateForm);
+    updateSuccessMsg();
     done();
     getLists();
   }
@@ -157,15 +162,15 @@ async function querySingerLists(): Promise<void> {
     value: item.id,
     label: item.singerName
   }));
-  for (let i = 0; i < songFormDetailColumns.length; i++) {
-    if (songFormDetailColumns[i].prop === "singerIds") {
-      songFormDetailColumns[i].options = options;
+  for (let i = 0; i < createFormColumns.length; i++) {
+    if (createFormColumns[i].prop === "singerId") {
+      createFormColumns[i].options = options;
       break;
     }
   }
-  for (let i = 0; i < songFormCreateColumn.length; i++) {
-    if (songFormCreateColumn[i].prop === "singerId") {
-      songFormCreateColumn[i].options = options;
+  for (let i = 0; i < updateFormColumns.length; i++) {
+    if (updateFormColumns[i].prop === "singerIds") {
+      updateFormColumns[i].options = options;
       break;
     }
   }
@@ -179,25 +184,25 @@ async function queryAlbumLists(): Promise<void> {
     value: item.id,
     label: item.albumName
   }));
-  for (let i = 0; i < songFormDetailColumns.length; i++) {
-    if (songFormDetailColumns[i].prop === "albumId") {
-      songFormDetailColumns[i].options = options;
+  for (let i = 0; i < createFormColumns.length; i++) {
+    if (createFormColumns[i].prop === "albumId") {
+      createFormColumns[i].options = options;
       break;
     }
   }
-  for (let i = 0; i < songFormCreateColumn.length; i++) {
-    if (songFormCreateColumn[i].prop === "albumId") {
-      songFormCreateColumn[i].options = options;
+  for (let i = 0; i < updateFormColumns.length; i++) {
+    if (updateFormColumns[i].prop === "albumId") {
+      updateFormColumns[i].options = options;
       break;
     }
   }
 }
 
-/** 歌曲详情-专辑筛选项列表 */
+/** 查询歌曲列表 */
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data } = await getSongLists(songRequest.value);
+    const { data } = await getSongLists(songQueryParam.value);
     const list: Array<SongResult> = data.list;
     tableData.value = list;
     pagination.total = data.total;
@@ -207,59 +212,53 @@ async function getLists(): Promise<void> {
   closeLoading();
 }
 
+/** 重置查询歌曲列表 */
 function resetLists(): void {
-  songForm.songName = "";
-  songForm.lyric = "";
-  songForm.albumName = "";
-  songForm.singerName = "";
-  songForm.startPublishTime = null;
-  songForm.endPublishTime = null;
-  pagination.currentPage = ORIGIN_CURRENT_PAGE;
-  pagination.pageSize = ORIGIN_PAGE_SIZE;
+  resetQueryForm();
+  resetPagination();
   getLists();
 }
 
+/** 删除歌曲信息 */
 async function deleteList(id: number): Promise<void> {
   await deleteSong(id);
-  message("删除成功", { type: "success" });
+  deleteSuccessMsg();
   getLists();
 }
 
-async function openDialog(
-  dialogOption: DialogOptions,
-  id?: number
-): Promise<void> {
-  if (id && id !== 0) {
-    const { data } = await getSongDetail(id);
-    songFormDetail.id = data.id;
-    songFormDetail.songName = data.songName;
-    songFormDetail.duration = data.duration;
-    songFormDetail.lyric = data.lyric;
-    songFormDetail.musicUrl = data.musicUrl;
-    songFormDetail.publishTime = data.publishTime;
-    songFormDetail.albumId = data.album?.id;
-    songFormDetail.singerIds = data.singers.map(item => item.id);
-  } else {
-    songFormCreate.songName = "";
-    songFormCreate.duration = null;
-    songFormCreate.lyric = "";
-    songFormCreate.musicUrl = "";
-    songFormCreate.publishTime = null;
-    songFormCreate.albumId = null;
-    songFormCreate.singerId = null;
-  }
-  addDialog(dialogOption);
-}
-
+/** 批量删除歌曲信息 */
 async function batchDeleteLists() {
   if (checkedIds.value.length > 0) {
     await Promise.all(checkedIds.value.map(id => deleteSong(id)));
-    message("删除成功", { type: "success" });
+    deleteSuccessMsg();
     getLists();
   } else {
-    message("当前无选中项", { type: "error" });
+    deleteNoCheckedMsg();
   }
 }
+
+/** 打开歌曲新增普通弹窗 */
+function openCreateDialog(): void {
+  resetCreateForm();
+  addDialog(createDialog);
+}
+
+/** 打开歌曲编辑弹窗 */
+async function openUpdateDialog(id: number): Promise<void> {
+  resetUpdateForm();
+  const { data } = await getSongDetail(id);
+  updateForm.id = data.id;
+  updateForm.songName = data.songName;
+  updateForm.duration = data.duration;
+  updateForm.lyric = data.lyric;
+  updateForm.musicUrl = data.musicUrl;
+  updateForm.publishTime = data.publishTime;
+  updateForm.albumId = data.album?.id;
+  updateForm.singerIds = data.singers.map(item => item.id);
+  addDialog(updateDialog);
+}
+
+// 以下是歌曲管理页面独有功能
 
 /** 批量式模板新增歌曲列表 */
 const batchTemplateNewSongs = ref<Array<SongCreate>>([]);
@@ -274,6 +273,7 @@ const embedFormColumns = reactive({
   singer: useMusicStoreHook().singerFormColumns
 });
 
+/** 批量模板表单页滚动参数 */
 const { childrenLength, enablePrev, enableNext, prevTo, nextTo } =
   useScrollView(".outer_form");
 
@@ -336,7 +336,7 @@ const batchTemplateSongsDialog = reactive<DialogOptions>({
   ),
   beforeSure: async (done: Function) => {
     await batchCreateSongs(batchTemplateNewSongs.value);
-    message("批量新增成功", { type: "success" });
+    batchCreateSuccessMsg();
     done();
     getLists();
   }
@@ -360,13 +360,13 @@ onMounted(() => {
 <template>
   <div>
     <SimpleForm
-      :form-value="songForm"
-      :form-columns="songFormColumns"
+      :form-value="queryForm"
+      :form-columns="queryFormColumns"
       :show-button="true"
       :is-flex="true"
       @query="getLists"
       @reset="resetLists"
-      @create="openDialog(songCreateDialog)"
+      @create="openCreateDialog"
       @delete="batchDeleteLists"
     />
     <MusicUpload @generate-new-songs="generateNewSongs" />
@@ -382,7 +382,7 @@ onMounted(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openDialog(songDetailDialog, row.id as number)"
+          @inline-edit="openUpdateDialog(row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>
