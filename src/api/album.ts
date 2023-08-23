@@ -4,10 +4,10 @@ import { AlbumDTO, NewAlbumDTO } from "@/music-api/dto/AlbumDTO";
 import { AlbumVO } from "@/music-api/vo/AlbumVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 
-/** 表单类型 */
-export type AlbumForm = Omit<AlbumDTO, "id" | "pageNo" | "pageSize">;
+/** page查询表单类型 */
+export type AlbumQueryForm = Omit<AlbumDTO, "id" | "pageNo" | "pageSize">;
 
-/** 更新参数类型 */
+/** 新增参数类型 编辑参数类型 */
 export type AlbumDetail = Pick<
   NewAlbumDTO & AlbumDTO,
   "id" | keyof NewAlbumDTO

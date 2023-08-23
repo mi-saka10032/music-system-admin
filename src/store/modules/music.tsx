@@ -5,9 +5,14 @@ import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 import { cloneDeep } from "@pureadmin/utils";
 import { type UnwrapRef } from "vue";
 import type { TableColumns } from "@pureadmin/table";
-import type { SingerResult, SingerForm } from "@/api/singer";
-import type { AlbumResult, AlbumForm, AlbumDetail } from "@/api/album";
-import type { SongResult, SongForm, SongDetail, SongCreate } from "@/api/song";
+import type { SingerResult, SingerQueryForm } from "@/api/singer";
+import type { AlbumResult, AlbumQueryForm, AlbumDetail } from "@/api/album";
+import type {
+  SongResult,
+  SongQueryForm,
+  SongUpdate,
+  SongCreate
+} from "@/api/song";
 
 type MusicStoreId = "admin-music";
 
@@ -38,13 +43,13 @@ export type TableColumnTypeList<T extends Object> = Array<
 /** 强约束所有Columns配置项prop字段 */
 export interface MusicState {
   singerTableColumns: TableColumnTypeList<SingerResult>;
-  singerFormColumns: FormColumnTypeList<SingerForm>;
+  singerFormColumns: FormColumnTypeList<SingerQueryForm>;
   albumTableColumns: TableColumnTypeList<AlbumResult>;
-  albumQueryFormColumns: FormColumnTypeList<AlbumForm>;
+  albumQueryFormColumns: FormColumnTypeList<AlbumQueryForm>;
   albumDetailFormColumns: FormColumnTypeList<AlbumDetail>;
   songTableColumns: TableColumnTypeList<SongResult>;
-  songQueryFormColumns: FormColumnTypeList<SongForm>;
-  songDetailFormColumns: FormColumnTypeList<SongDetail>;
+  songQueryFormColumns: FormColumnTypeList<SongQueryForm>;
+  songDetailFormColumns: FormColumnTypeList<SongUpdate>;
 }
 
 /** 强约束所有Columns配置项prop字段 */
@@ -53,7 +58,7 @@ export interface MusicGetters {
   songCreateFormColumns: (
     state: UnwrapRef<MusicState>
   ) => FormColumnTypeList<SongCreate>;
-  templateSongCreateFormColumns: (
+  songTemplateCreateFormColumns: (
     state: UnwrapRef<MusicState>
   ) => FormColumnTypeList<SongCreate>;
 }
@@ -336,7 +341,7 @@ export const useMusicStore = defineStore<MusicStoreId, MusicState, MusicGetters>
       return columns;
     },
     // 模板歌曲新增详情表单配置，新增歌手和新增专辑变更为 歌手和专辑 的表单配置 空出slot插槽
-    templateSongCreateFormColumns: state => {
+    songTemplateCreateFormColumns: state => {
       const columns: FormColumnTypeList<SongCreate> = cloneDeep(
         state.songDetailFormColumns
       );

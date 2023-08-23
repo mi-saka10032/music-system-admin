@@ -5,7 +5,7 @@ import { useCreate, useRead, useUpdate, useDelete } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
 import { emitter } from "@/utils/mitt";
 import type {
-  AlbumForm,
+  AlbumQueryForm,
   AlbumParam,
   AlbumResult,
   AlbumDetail
@@ -41,7 +41,7 @@ const {
   resetPagination
 } = useTable<AlbumResult>();
 
-const { queryForm, queryFormColumns, resetQueryForm } = useRead<AlbumForm>(
+const { queryForm, queryFormColumns, resetQueryForm } = useRead<AlbumQueryForm>(
   {
     albumName: "",
     coverUrl: "",
@@ -108,7 +108,7 @@ const createDialog = reactive<DialogOptions>({
 });
 
 /** 专辑编辑详情弹窗 */
-const updateDialog = reactive<DialogOptions>({
+const editDialog = reactive<DialogOptions>({
   title: "专辑信息编辑",
   contentRenderer: () => (
     <SimpleForm
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
       <!-- 操作列的slot名称必须为operation -->
       <template #operation="{ row }">
         <InlineButton
-          @inline-edit="openUpdateDialog(updateDialog, row.id as number)"
+          @inline-edit="openUpdateDialog(editDialog, row.id as number)"
           @inline-delete="deleteList(row.id)"
         />
       </template>

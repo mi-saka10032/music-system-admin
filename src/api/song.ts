@@ -14,11 +14,14 @@ export type BaseSongResultList = Pick<
   keyof PageVOClass<BaseSongResult>
 >;
 
-/** 表单类型 */
-export type SongForm = Omit<SongDTO, "id" | "pageNo" | "pageSize">;
+/** page查询表单类型 */
+export type SongQueryForm = Omit<SongDTO, "id" | "pageNo" | "pageSize">;
 
-/** 更新参数类型 */
-export type SongDetail = Pick<UpdateSongDTO, keyof UpdateSongDTO>;
+/** 编辑参数类型 */
+export type SongUpdate = Pick<UpdateSongDTO, keyof UpdateSongDTO>;
+
+/** 新增参数类型 */
+export type SongCreate = Pick<NewSongDTO, keyof NewSongDTO>;
 
 /** page查询入参类型 */
 export type SongParam = Omit<SongDTO, "id">;
@@ -31,9 +34,6 @@ export type SongResultList = Pick<
   PageVOClass<SongResult>,
   keyof PageVOClass<SongResult>
 >;
-
-/** 新增歌曲表单参数类型 */
-export type SongCreate = Pick<NewSongDTO, keyof NewSongDTO>;
 
 const songPrefix = "/song";
 
@@ -52,7 +52,7 @@ export const getSongDetail = (id: number) => {
 };
 
 /** 更新歌曲信息 */
-export const updateSong = (data: SongDetail) => {
+export const updateSong = (data: SongUpdate) => {
   return http.post<SystemResponse<SongResult>>(`${songPrefix}/update`, {
     data
   });

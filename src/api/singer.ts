@@ -4,10 +4,10 @@ import { SingerDTO } from "@/music-api/dto/SingerDTO";
 import { SingerVO } from "@/music-api/vo/SingerVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 
-/** 表单类型 */
-export type SingerForm = Pick<SingerDTO, "singerName" | "coverUrl">;
+/** page查询表单类型 */
+export type SingerQueryForm = Pick<SingerDTO, "singerName" | "coverUrl">;
 
-/** 更新参数类型 */
+/** 新增参数类型 编辑参数类型 */
 export type SingerDetail = Pick<SingerDTO, "id" | "singerName" | "coverUrl">;
 
 /** page查询入参类型 */

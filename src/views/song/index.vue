@@ -4,10 +4,10 @@ import { useTable } from "@/hooks/useTable";
 import { useCreate, useRead, useUpdate, useDelete } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
 import type {
-  SongForm,
+  SongQueryForm,
   SongParam,
   SongResult,
-  SongDetail,
+  SongUpdate,
   SongCreate
 } from "@/api/song";
 import {
@@ -44,7 +44,7 @@ const {
   resetPagination
 } = useTable<SongResult>();
 
-const { queryForm, queryFormColumns, resetQueryForm } = useRead<SongForm>(
+const { queryForm, queryFormColumns, resetQueryForm } = useRead<SongQueryForm>(
   {
     songName: "",
     lyric: "",
@@ -85,7 +85,7 @@ const {
 );
 
 const { updateForm, updateFormColumns, resetUpdateForm, updateSuccessMsg } =
-  useUpdate<SongDetail>(
+  useUpdate<SongUpdate>(
     {
       id: null,
       songName: "",
@@ -136,7 +136,7 @@ const createDialog = reactive<DialogOptions>({
 });
 
 /** 歌曲编辑详情弹窗 */
-const updateDialog = reactive<DialogOptions>({
+const editDialog = reactive<DialogOptions>({
   title: "歌曲信息编辑",
   contentRenderer: () => (
     <SimpleForm
@@ -255,7 +255,7 @@ async function openUpdateDialog(id: number): Promise<void> {
   updateForm.publishTime = data.publishTime;
   updateForm.albumId = data.album?.id;
   updateForm.singerIds = data.singers.map(item => item.id);
-  addDialog(updateDialog);
+  addDialog(editDialog);
 }
 
 // 以下是歌曲管理页面独有功能
@@ -265,7 +265,7 @@ const batchTemplateNewSongs = ref<Array<SongCreate>>([]);
 
 /** 批量式模板歌曲新增表单详情配置 */
 const batchTemplateSongsFormColumns =
-  useMusicStoreHook().templateSongCreateFormColumns;
+  useMusicStoreHook().songTemplateCreateFormColumns;
 
 /** 内嵌歌手 内嵌专辑 表单详情配置 */
 const embedFormColumns = reactive({

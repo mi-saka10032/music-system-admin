@@ -139,9 +139,9 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     :on-success="onSuccessResponse"
     :on-error="onErrorResponse"
   >
-    <el-tooltip effect="light" placement="top" :enterable="false">
+    <el-tooltip effect="light" placement="bottom" :enterable="false">
       <template #content>
-        <p class="text-sm">
+        <p class="text-sm text-gray-500 font-semibold">
           支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗
         </p>
       </template>
