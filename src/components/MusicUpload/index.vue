@@ -11,6 +11,7 @@ import { formatToken, getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { type UploadProps, ElLoading } from "element-plus";
 import SystemResponse from "@/music-api/code/SystemResponse";
+import { ErrorCode } from "@/music-api/code/ErrorCode";
 import type { SongCreate } from "@/api/song";
 
 defineOptions({
@@ -68,16 +69,21 @@ const onSuccessResponse: UploadProps["onSuccess"] = (
   response: SystemResponse<Array<SongCreate>>
 ) => {
   completedUploadCount();
-  succeedCount();
-  // 收集响应数据
-  successfulNewSongs.value.push(...response.data);
+  if (response.code === ErrorCode.OK) {
+    succeedCount();
+    // 收集响应数据
+    successfulNewSongs.value.push(...response.data);
+  } else {
+    failCount();
+    message(response.msg, { type: "error" });
+  }
 };
 
 /** 失败回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 失败计数+1 */
-const onErrorResponse: UploadProps["onError"] = (error: any) => {
+const onErrorResponse: UploadProps["onError"] = error => {
   completedUploadCount();
   failCount();
-  console.log(error);
+  message(error.message, { type: "error" });
 };
 
 const loadingOption = {
@@ -113,7 +119,9 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     message(`上传解析已完成，成功${successfulCount}个，失败${failureCount}个`);
     successfulUploadCount.value = 0;
     failureUploadCount.value = 0;
-    emit("generate-new-songs", successfulNewSongs.value);
+    if (successfulNewSongs.value.length > 0) {
+      emit("generate-new-songs", successfulNewSongs.value);
+    }
   }
 });
 </script>
@@ -131,7 +139,7 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     :on-success="onSuccessResponse"
     :on-error="onErrorResponse"
   >
-    <el-tooltip effect="light" placement="top">
+    <el-tooltip effect="light" placement="top" :enterable="false">
       <template #content>
         <p class="text-sm">
           支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗

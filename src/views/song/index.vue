@@ -315,14 +315,16 @@ const batchTemplateSongsDialog = reactive<DialogOptions>({
         ))}
       </div>
       {batchTemplateNewSongs.value.length > 1 ? (
-        <div class="flex justify-center items-center mt-1">
+        <div class="flex justify-center items-center mt-2">
           <el-button
             icon={Back}
+            circle
             disabled={!enablePrev.value}
             onClick={prevTo}
           />
           <el-button
             icon={Right}
+            circle
             disabled={!enableNext.value}
             onClick={nextTo}
           />
