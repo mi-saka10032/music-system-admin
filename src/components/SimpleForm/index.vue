@@ -73,18 +73,25 @@ const confirmDelete = async () => {
             v-model.number="formValue[item.prop]"
             :placeholder="item.placeholder || '请输入数字'"
           />
+          <el-input
+            v-else-if="item.type === 'textarea'"
+            type="textarea"
+            v-model="formValue[item.prop]"
+            :rows="5"
+            :placeholder="item.placeholder || '请输入'"
+          />
           <el-date-picker
             v-else-if="item.type === 'date'"
             v-model="formValue[item.prop]"
             type="date"
-            :placeholder="item.placeholder ?? '请选择'"
+            :placeholder="item.placeholder || '请选择'"
           />
           <el-select
             v-else-if="item.type === 'select' || item.type === 'multi_select'"
             v-model="formValue[item.prop]"
             :multiple="item.type === 'multi_select'"
             clearable
-            :placeholder="item.placeholder ?? '请选择'"
+            :placeholder="item.placeholder || '请选择'"
           >
             <el-option
               v-for="(option, index) in item.options || []"

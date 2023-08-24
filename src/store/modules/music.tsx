@@ -22,7 +22,14 @@ export interface OptionValue {
 }
 
 export interface FormColumn {
-  type: "input" | "input_number" | "select" | "multi_select" | "date" | "slot";
+  type:
+    | "input"
+    | "input_number"
+    | "textarea"
+    | "select"
+    | "multi_select"
+    | "date"
+    | "slot";
   label: string;
   prop: string;
   placeholder?: string;
@@ -296,7 +303,7 @@ export const useMusicStore = defineStore<
         prop: "songName"
       },
       {
-        type: "input",
+        type: "textarea",
         label: "歌词",
         prop: "lyric"
       },
