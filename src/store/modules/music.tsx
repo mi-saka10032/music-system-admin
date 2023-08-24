@@ -61,6 +61,9 @@ export interface MusicGetters {
   songTemplateCreateFormColumns: (
     state: UnwrapRef<MusicState>
   ) => FormColumnTypeList<SongCreate>;
+  relatedSongsTableColumns: (
+    state: UnwrapRef<MusicState>
+  ) => TableColumnTypeList<SongResult>;
 }
 
 export const useMusicStore = defineStore<
@@ -366,6 +369,13 @@ export const useMusicStore = defineStore<
         }
       );
       return columns;
+    },
+    // 专辑/歌手 关联歌曲表格配置，相比歌曲完整表格配置删减了一部分
+    relatedSongsTableColumns: state => {
+      const columns: TableColumnTypeList<SongResult> = cloneDeep(
+        state.songTableColumns
+      );
+      return [...columns.slice(1, 4), ...columns.slice(6, 9)];
     }
   }
 });

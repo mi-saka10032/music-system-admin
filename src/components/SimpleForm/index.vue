@@ -9,16 +9,20 @@
  * 功能按钮在下部点缀，如果需要位置调整，请使用deep穿透btn_container来调整position
  * 最后isFlex表示是否将form行内排列，true则每行4等分排列，false则每个item一行排列
  */
-import type { FormColumn } from "@/store/modules/music";
+import type { FormColumnTypeList } from "@/store/modules/music";
 import { ElMessageBox } from "element-plus";
 
 defineOptions({
   name: "SimpleForm"
 });
 
+interface FormValue {
+  [key: string]: any;
+}
+
 interface SimpleForm {
-  formColumns: Array<FormColumn>;
-  formValue: { [key: string]: any };
+  formColumns: FormColumnTypeList<FormValue>;
+  formValue: FormValue;
   showButton: boolean;
   isFlex: boolean;
 }
@@ -60,24 +64,24 @@ const confirmDelete = async () => {
           <el-input
             v-if="item.type === 'input'"
             clearable
-            v-model="formValue[item.prop as string]"
+            v-model="formValue[item.prop]"
             :placeholder="item.placeholder || '请输入'"
           />
           <el-input
             v-else-if="item.type === 'input_number'"
             clearable
-            v-model.number="formValue[item.prop as string]"
+            v-model.number="formValue[item.prop]"
             :placeholder="item.placeholder || '请输入数字'"
           />
           <el-date-picker
             v-else-if="item.type === 'date'"
-            v-model="formValue[item.prop as string]"
+            v-model="formValue[item.prop]"
             type="date"
             :placeholder="item.placeholder ?? '请选择'"
           />
           <el-select
             v-else-if="item.type === 'select' || item.type === 'multi_select'"
-            v-model="formValue[item.prop as string]"
+            v-model="formValue[item.prop]"
             :multiple="item.type === 'multi_select'"
             clearable
             :placeholder="item.placeholder ?? '请选择'"

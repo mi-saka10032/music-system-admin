@@ -4,6 +4,7 @@
  -->
 <script setup lang="tsx">
 import { watchEffect } from "vue";
+import { useMusicStoreHook } from "@/store/modules/music";
 import { useTable } from "@/hooks/useTable";
 import {
   type SongResult,
@@ -12,7 +13,6 @@ import {
   disassociation_album_song,
   disassociation_singer_song
 } from "@/api/song";
-import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 import { message } from "@/utils/message";
 
 defineOptions({
@@ -35,36 +35,7 @@ const {
   resetPagination
 } = useTable<SongResult>();
 
-tableColumns.value = [
-  {
-    label: "歌曲名称",
-    prop: "songName"
-  },
-  {
-    label: "歌曲时长",
-    prop: "duration",
-    cellRenderer: ({ row }) => <>{formatDuration(row["duration"])}</>
-  },
-  {
-    label: "歌词",
-    prop: "lyric",
-    showOverflowTooltip: true
-  },
-  {
-    label: "链接",
-    prop: "musicUrl"
-  },
-  {
-    label: "发行日期",
-    prop: "publishTime",
-    cellRenderer: ({ row }) => <>{formatDateWithAny(row["publishTime"])}</>
-  },
-  {
-    label: "操作",
-    fixed: "right",
-    slot: "operation"
-  }
-];
+tableColumns.value = useMusicStoreHook().relatedSongsTableColumns;
 
 async function getRelatedLists() {
   try {
