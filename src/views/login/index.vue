@@ -17,8 +17,9 @@ import dayIcon from "@/assets/svg/day.svg?component";
 import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
+import Capsule from "@iconify-icons/ri/capsule-fill";
 import SystemResponse from "@/music-api/code/SystemResponse";
-import type { LoginResult } from "@/api/user";
+import { type LoginParam, type LoginResult, getCaptcha } from "@/api/user";
 
 defineOptions({
   name: "Login"
@@ -34,10 +35,15 @@ const { dataTheme, dataThemeChange } = useDataThemeChange();
 dataThemeChange();
 const { title } = useNav();
 
-const ruleForm = reactive({
+const ruleForm = reactive<LoginParam>({
   username: "misaka10032",
-  password: "123456abc"
+  password: "123456abc",
+  captchaCode: "",
+  captchaId: "" // 验证码接口回传的id值
 });
+
+/** 验证码base64 */
+const captchaPath = ref("");
 
 const onLogin = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
@@ -45,10 +51,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   if (valid) {
     loading.value = true;
     useUserStoreHook()
-      .loginByUsername({
-        username: ruleForm.username,
-        password: ruleForm.password
-      })
+      .loginByUsername(ruleForm)
       .then((res: SystemResponse<LoginResult>) => {
         if (res.data?.accessToken) {
           // 获取后端路由
@@ -74,8 +77,15 @@ function onkeypress({ code }: KeyboardEvent) {
   }
 }
 
+async function refreshCaptcha() {
+  const { data } = await getCaptcha();
+  ruleForm.captchaId = data.id;
+  captchaPath.value = data.imageBase64;
+}
+
 onMounted(() => {
   window.document.addEventListener("keypress", onkeypress);
+  refreshCaptcha();
 });
 
 onBeforeUnmount(() => {
@@ -142,6 +152,26 @@ onBeforeUnmount(() => {
                   placeholder="密码"
                   :prefix-icon="useRenderIcon(Lock)"
                 />
+              </el-form-item>
+            </Motion>
+
+            <Motion :delay="200">
+              <el-form-item prop="captchaCode">
+                <el-input
+                  clearable
+                  v-model="ruleForm.captchaCode"
+                  placeholder="验证码"
+                  :prefix-icon="useRenderIcon(Capsule)"
+                >
+                  <template #append>
+                    <img
+                      :src="captchaPath"
+                      alt=""
+                      class="w-32 h-10 cursor-pointer"
+                      @click="refreshCaptcha"
+                    />
+                  </template>
+                </el-input>
               </el-form-item>
             </Motion>
 
