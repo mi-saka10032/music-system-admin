@@ -7,7 +7,6 @@ import { storageSession } from "@pureadmin/utils";
 import { LoginParam, getLogin } from "@/api/user";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
-import SystemResponse from "@/music-api/code/SystemResponse";
 import type { LoginResult } from "@/api/user";
 
 export const useUserStore = defineStore({
@@ -30,11 +29,11 @@ export const useUserStore = defineStore({
     },
     /** 登入 */
     async loginByUsername(data: LoginParam) {
-      return new Promise<SystemResponse<LoginResult>>((resolve, reject) => {
+      return new Promise<LoginResult>((resolve, reject) => {
         getLogin(data)
           .then(data => {
             if (data) {
-              setToken(data.data);
+              setToken(data);
               resolve(data);
             }
           })

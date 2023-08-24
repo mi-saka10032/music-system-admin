@@ -41,7 +41,7 @@ async function getRelatedLists() {
   try {
     if (props.relation === "album") {
       openLoading();
-      const { data } = await getAlbumRelatedSongLists({
+      const data = await getAlbumRelatedSongLists({
         albumId: props.relatedId,
         pageNo: pagination.currentPage,
         pageSize: pagination.pageSize
@@ -50,7 +50,7 @@ async function getRelatedLists() {
       pagination.total = data.total;
     } else if (props.relation === "singer") {
       openLoading();
-      const { data } = await getSingerRelatedSongLists({
+      const data = await getSingerRelatedSongLists({
         singerId: props.relatedId,
         pageNo: pagination.currentPage,
         pageSize: pagination.pageSize

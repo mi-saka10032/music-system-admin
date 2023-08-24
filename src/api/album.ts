@@ -1,5 +1,4 @@
 import { http } from "@/utils/http";
-import SystemResponse from "@/music-api/code/SystemResponse";
 import { AlbumDTO, NewAlbumDTO } from "@/music-api/dto/AlbumDTO";
 import { AlbumVO } from "@/music-api/vo/AlbumVO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
@@ -29,46 +28,30 @@ const albumPrefix = "/album";
 
 /** 获取专辑列表 */
 export const getAlbumLists = (data: AlbumParam) => {
-  return http.request<SystemResponse<AlbumResultList>>(
-    "post",
-    `${albumPrefix}/page`,
-    { data }
-  );
+  return http.request<AlbumResultList>("post", `${albumPrefix}/page`, { data });
 };
 
 /** 获取专辑详情 */
 export const getAlbumDetail = (id: number) => {
-  return http.request<SystemResponse<AlbumResult>>(
-    "post",
-    `${albumPrefix}/findById`,
-    { params: { id } }
-  );
+  return http.request<AlbumResult>("post", `${albumPrefix}/findById`, {
+    params: { id }
+  });
 };
 
 /** 更新专辑信息 */
 export const updateAlbum = (data: AlbumDetail) => {
-  return http.request<SystemResponse<AlbumResult>>(
-    "post",
-    `${albumPrefix}/update`,
-    { data }
-  );
+  return http.request<AlbumResult>("post", `${albumPrefix}/update`, { data });
 };
 
 /** 创建专辑信息 */
 export const createAlbum = (data: AlbumDetail) => {
   delete data.id;
-  return http.request<SystemResponse<AlbumResult>>(
-    "post",
-    `${albumPrefix}/create`,
-    { data }
-  );
+  return http.request<AlbumResult>("post", `${albumPrefix}/create`, { data });
 };
 
 /** 删除专辑信息 */
 export const deleteAlbum = (id: number) => {
-  return http.request<SystemResponse<AlbumResult>>(
-    "post",
-    `${albumPrefix}/delete`,
-    { params: { id } }
-  );
+  return http.request<AlbumResult>("post", `${albumPrefix}/delete`, {
+    params: { id }
+  });
 };

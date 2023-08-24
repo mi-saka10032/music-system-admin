@@ -139,7 +139,7 @@ const relatedDialog = reactive<DialogOptions>({
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data } = await getSingerLists(singerQueryParam.value);
+    const data = await getSingerLists(singerQueryParam.value);
     tableData.value = data.list;
     pagination.total = data.total;
   } catch (error: any) {
@@ -185,7 +185,7 @@ async function openEditDialog(
   id: number
 ): Promise<void> {
   resetUpdateForm();
-  const { data } = await getSingerDetail(id);
+  const data = await getSingerDetail(id);
   updateForm.id = data.id;
   updateForm.singerName = data.singerName;
   updateForm.coverUrl = data.coverUrl;

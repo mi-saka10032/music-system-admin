@@ -157,7 +157,7 @@ const editDialog = reactive<DialogOptions>({
 /** singer的全量筛选项 挂载时触发 */
 async function querySingerLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
-  const { data } = await getSingerLists(param as SingerParam);
+  const data = await getSingerLists(param as SingerParam);
   const options = data.list.map(item => ({
     value: item.id,
     label: item.singerName
@@ -179,7 +179,7 @@ async function querySingerLists(): Promise<void> {
 /** album的全量筛选项 挂载时触发 */
 async function queryAlbumLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
-  const { data } = await getAlbumLists(param as AlbumParam);
+  const data = await getAlbumLists(param as AlbumParam);
   const options = data.list.map(item => ({
     value: item.id,
     label: item.albumName
@@ -202,7 +202,7 @@ async function queryAlbumLists(): Promise<void> {
 async function getLists(): Promise<void> {
   openLoading();
   try {
-    const { data } = await getSongLists(songQueryParam.value);
+    const data = await getSongLists(songQueryParam.value);
     const list = data.list;
     tableData.value = list;
     pagination.total = data.total;
@@ -246,7 +246,7 @@ function openCreateDialog(): void {
 /** 打开歌曲编辑弹窗 */
 async function openUpdateDialog(id: number): Promise<void> {
   resetUpdateForm();
-  const { data } = await getSongDetail(id);
+  const data = await getSongDetail(id);
   updateForm.id = data.id;
   updateForm.songName = data.songName;
   updateForm.duration = data.duration;
@@ -281,7 +281,7 @@ const { childrenLength, enablePrev, enableNext, prevTo, nextTo } =
 const batchTemplateSongsDialog = reactive<DialogOptions>({
   title: "批量新增歌曲信息",
   contentRenderer: () => (
-    <>
+    <div>
       <div class="outer_form flex overflow-x-scroll">
         {batchTemplateNewSongs.value.map(item => (
           <SimpleForm
@@ -330,9 +330,9 @@ const batchTemplateSongsDialog = reactive<DialogOptions>({
           />
         </div>
       ) : (
-        <></>
+        <div></div>
       )}
-    </>
+    </div>
   ),
   beforeSure: async (done: Function) => {
     await batchCreateSongs(batchTemplateNewSongs.value);

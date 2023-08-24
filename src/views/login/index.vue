@@ -18,7 +18,6 @@ import darkIcon from "@/assets/svg/dark.svg?component";
 import Lock from "@iconify-icons/ri/lock-fill";
 import User from "@iconify-icons/ri/user-3-fill";
 import Capsule from "@iconify-icons/ri/capsule-fill";
-import SystemResponse from "@/music-api/code/SystemResponse";
 import { type LoginParam, type LoginResult, getCaptcha } from "@/api/user";
 
 defineOptions({
@@ -52,8 +51,8 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     loading.value = true;
     useUserStoreHook()
       .loginByUsername(ruleForm)
-      .then((res: SystemResponse<LoginResult>) => {
-        if (res.data?.accessToken) {
+      .then((data: LoginResult) => {
+        if (data?.accessToken) {
           // 获取后端路由
           initRouter().then(() => {
             router.push(getTopMenu(true).path);
@@ -78,7 +77,7 @@ function onkeypress({ code }: KeyboardEvent) {
 }
 
 async function refreshCaptcha() {
-  const { data } = await getCaptcha();
+  const data = await getCaptcha();
   ruleForm.captchaId = data.id;
   captchaPath.value = data.imageBase64;
 }

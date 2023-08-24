@@ -131,17 +131,17 @@ class PureHttp {
           message(msg, { type: "error" });
           return Promise.reject(msg);
         }
-        // 正常返回数据
+        // 正常返回数据 response.data.data -> SystemResponse
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
         if (typeof $config.beforeResponseCallback === "function") {
           $config.beforeResponseCallback(response);
-          return response.data;
+          return response.data.data;
         }
         if (PureHttp.initConfig.beforeResponseCallback) {
           PureHttp.initConfig.beforeResponseCallback(response);
-          return response.data;
+          return response.data.data;
         }
-        return response.data;
+        return response.data.data;
       },
       (error: PureHttpError) => {
         const $error = error;
