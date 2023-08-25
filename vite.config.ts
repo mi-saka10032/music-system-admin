@@ -27,8 +27,14 @@ const __APP_INFO__ = {
 };
 
 export default ({ command, mode }: ConfigEnv): UserConfigExport => {
-  const { VITE_CDN, VITE_PORT, VITE_COMPRESSION, VITE_PUBLIC_PATH } =
-    warpperEnv(loadEnv(mode, root));
+  const {
+    VITE_CDN,
+    VITE_PORT,
+    VITE_COMPRESSION,
+    VITE_PUBLIC_PATH,
+    VITE_GATEWAY_PREFIX,
+    VITE_GATEWAY_URL
+  } = warpperEnv(loadEnv(mode, root));
   return {
     base: VITE_PUBLIC_PATH,
     root,
@@ -44,7 +50,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
       host: "0.0.0.0",
       // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
       proxy: {
-        "/api": "http://localhost:7001"
+        [VITE_GATEWAY_PREFIX]: VITE_GATEWAY_URL
       }
     },
     plugins: getPluginsList(command, VITE_CDN, VITE_COMPRESSION),
