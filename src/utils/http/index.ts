@@ -23,7 +23,7 @@ import { storageSession } from "@pureadmin/utils";
 const defaultConfig: AxiosRequestConfig = {
   baseURL: "/api",
   // 请求超时时间
-  timeout: 66000,
+  timeout: 10000,
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",
