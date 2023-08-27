@@ -7,12 +7,11 @@
  -->
 <script setup lang="ts">
 import { shallowRef, ref, computed, watch } from "vue";
-import { useWebsocket } from "./useWebsocket";
 import { formatToken, getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { type UploadProps, ElLoading } from "element-plus";
-import SystemResponse from "@/music-api/code/SystemResponse";
 import { ErrorCode } from "@/music-api/code/ErrorCode";
+import type SystemResponse from "@/music-api/code/SystemResponse";
 import type { SongCreate } from "@/api/song";
 
 defineOptions({
@@ -125,19 +124,10 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     }
   }
 });
-
-// 引入websocket 提供onmessage回调 mounted时初始化连接
-const wsMessage = (event: MessageEvent<any>) => {
-  console.log(event.data);
-};
-
-const { wsLoading } = useWebsocket(wsMessage);
 </script>
 
 <template>
   <el-upload
-    v-loading="wsLoading"
-    element-loading-text="Websocket连接中"
     class="flex flex-row-reverse items-center mb-4"
     :action="UPLOAD_URL"
     :headers="HEADERS"

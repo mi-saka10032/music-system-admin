@@ -45,11 +45,17 @@ export function useScrollView(containerSelector: string) {
     target.scrollIntoView(scrollOption);
   }
 
+  // 注意外部方法在合理的时机重置索引值
+  function resetCurIndex() {
+    curIndex.value = 0;
+  }
+
   return {
     childrenLength,
     enablePrev,
     enableNext,
     prevTo,
-    nextTo
+    nextTo,
+    resetCurIndex
   };
 }

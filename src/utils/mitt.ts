@@ -10,6 +10,7 @@ type Events = {
   changLayoutRoute: string;
   openSingerSongsDialog: string;
   openAlbumSongsDialog: string;
+  websocketMessage: string;
 };
 
 export const emitter: Emitter<Events> = mitt<Events>();
