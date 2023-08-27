@@ -7,12 +7,13 @@
  -->
 <script setup lang="ts">
 import { shallowRef, ref, computed, watch } from "vue";
-import { formatToken, getToken } from "@/utils/auth";
 import { message } from "@/utils/message";
-import { type UploadProps, ElLoading } from "element-plus";
-import { ErrorCode } from "@/music-api/code/ErrorCode";
-import type SystemResponse from "@/music-api/code/SystemResponse";
-import type { SongCreate } from "@/api/song";
+import {
+  type UploadProps,
+  ElLoading,
+  UploadRequestOptions
+} from "element-plus";
+import { type SongCreate, uploadSongs } from "@/api/song";
 
 defineOptions({
   name: "MusicUpload"
@@ -27,10 +28,6 @@ interface LoadingService {
 }
 
 // 上传常量
-const UPLOAD_URL = "/api/song/upload";
-const HEADERS = {
-  Authorization: formatToken(getToken()?.accessToken || "")
-};
 const MAX_SIZE = 256 * 1024 * 1024;
 const MAX_SIZE_TEXT = "256MB";
 const ACCEPT = ".mp3";
@@ -51,7 +48,6 @@ const failCount = () => (failureUploadCount.value += 1);
 // 成功回调数据收集列表
 const successfulNewSongs = shallowRef<Array<SongCreate>>([]);
 
-/** 上传前回调，拒绝大体积文件上传，避免上传堵塞 */
 const beforeUploadHandler: UploadProps["beforeUpload"] = rawFile => {
   const { name, size } = rawFile;
   if (size > MAX_SIZE) {
@@ -60,30 +56,29 @@ const beforeUploadHandler: UploadProps["beforeUpload"] = rawFile => {
     });
     return false;
   }
-  beforeUploadCount();
   return true;
 };
 
-/** 成功回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 成功计数+1 */
-const onSuccessResponse: UploadProps["onSuccess"] = (
-  response: SystemResponse<Array<SongCreate>>
-) => {
-  completedUploadCount();
-  if (response.code === ErrorCode.OK) {
+/** 上传前回调，拒绝大体积文件上传，避免上传堵塞 */
+const customUpload = async (options: UploadRequestOptions) => {
+  const formData = new FormData();
+  formData.append("file", options.file);
+  try {
+    beforeUploadCount();
+    const data = await uploadSongs(formData);
+    /** 成功回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 成功计数+1 */
     succeedCount();
     // 收集响应数据
-    successfulNewSongs.value.push(...response.data);
-  } else {
+    successfulNewSongs.value.push(...data);
+  } catch (error: any) {
+    /** 失败回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 失败计数+1 */
     failCount();
-    message(response.msg, { type: "error" });
+    console.log(error);
+    message(error, { type: "error" });
+  } finally {
+    // 无论成功or失败均表示上传动作完成
+    completedUploadCount();
   }
-};
-
-/** 失败回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 失败计数+1 */
-const onErrorResponse: UploadProps["onError"] = error => {
-  completedUploadCount();
-  failCount();
-  message(error.message, { type: "error" });
 };
 
 const loadingOption = {
@@ -129,15 +124,12 @@ watch(waitingUploadCount, (newCount, oldCount) => {
 <template>
   <el-upload
     class="flex flex-row-reverse items-center mb-4"
-    :action="UPLOAD_URL"
-    :headers="HEADERS"
     :show-file-list="false"
     multiple
     :accept="ACCEPT"
     :limit="LIMIT_COUNT"
     :before-upload="beforeUploadHandler"
-    :on-success="onSuccessResponse"
-    :on-error="onErrorResponse"
+    :http-request="customUpload"
   >
     <el-tooltip effect="light" placement="bottom" :enterable="false">
       <template #content>

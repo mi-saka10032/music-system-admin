@@ -121,3 +121,18 @@ export const disassociation_singer_song = (data: DISASSOCIATIONSingerParam) => {
     data
   });
 };
+
+/** 上传歌曲 */
+export const uploadSongs = (data: FormData) => {
+  return http.post<Array<SongCreate>>(
+    `${songPrefix}/upload`,
+    {
+      data
+    },
+    {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    }
+  );
+};
