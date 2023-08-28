@@ -10,7 +10,6 @@ import { visualizer } from "rollup-plugin-visualizer";
 import removeConsole from "vite-plugin-remove-console";
 import themePreprocessorPlugin from "@pureadmin/theme";
 import { genScssMultipleScopeVars } from "../src/layout/theme";
-import requireTransform from "vite-plugin-require-transform";
 
 export function getPluginsList(
   command: string,
@@ -52,10 +51,6 @@ export function getPluginsList(
     // 打包分析
     lifecycle === "report"
       ? visualizer({ open: true, brotliSize: true, filename: "report.html" })
-      : null,
-    // 增加requirejs支持 使用ali-oss前提
-    requireTransform({
-      fileRegex: /.ts$|.tsx$|.vue$|.js$/
-    })
+      : null
   ];
 }
