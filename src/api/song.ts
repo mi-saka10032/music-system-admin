@@ -128,5 +128,5 @@ export const disassociation_singer_song = (data: DISASSOCIATIONSingerParam) => {
 
 /** 获取阿里云OSS-STSToken，用户客户端文件直传OSS */
 export const getSTSToken = () => {
-  return http.get<any>(`${songPrefix}/getSTS`);
+  return http.get<OSSConfig>(`${songPrefix}/getSTS`);
 };
