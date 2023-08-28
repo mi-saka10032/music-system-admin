@@ -345,6 +345,14 @@ export const useMusicStore = defineStore<
       const columns: FormColumnTypeList<SongCreate> = cloneDeep(
         state.songDetailFormColumns
       );
+      // 新增表单改为slot 上传OSS返回链接
+      columns.splice(2, 1, {
+        type: "slot",
+        label: "链接",
+        prop: "musicUrl",
+        slot: "ossUpload",
+        placeholder: "请上传文件后待返回OSS链接"
+      });
       columns.splice(4, 1, {
         type: "select",
         label: "新增歌手",
