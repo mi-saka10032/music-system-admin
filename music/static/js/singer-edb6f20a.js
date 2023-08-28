@@ -1,1 +1,0 @@
-import{aV as t}from"./index-7abcff81.js";const r="/singer",n=e=>t.request("post",`${r}/page`,{data:e}),a=e=>t.request("post",`${r}/findById`,{params:{id:e}}),o=e=>t.request("post",`${r}/update`,{data:e}),i=e=>(delete e.id,t.request("post",`${r}/create`,{data:e})),p=e=>t.request("post",`${r}/delete`,{params:{id:e}});export{a,i as c,p as d,n as g,o as u};

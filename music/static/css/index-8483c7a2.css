@@ -1,10 +1,1 @@
-.outer_form .el-form-item__label {
-  font-weight: 700;
-}
-.outer_form .embed_album .el-form-item:not(:last-child),
-.outer_form .embed_singer .el-form-item:not(:last-child) {
-  margin-bottom: 1rem;
-}
-.outer_form::-webkit-scrollbar {
-  display: none;
-}
+.outer_form .el-form-item__label{font-weight:700}.outer_form .embed_album .el-form-item:not(:last-child),.outer_form .embed_singer .el-form-item:not(:last-child){margin-bottom:1rem}.outer_form::-webkit-scrollbar{display:none}
