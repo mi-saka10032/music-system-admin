@@ -10,7 +10,7 @@ import { emitter } from "@/utils/mitt";
 
 // 默认30秒发一次心跳以保证稳定连接
 export function useWebsocket(timeout = 30000) {
-  const url = import.meta.env.VITE_WS_URL;
+  const baseURL = `ws://${window.location.host}`;
   // WebSocket实例 | 计时器 | 重连次数
   let ws: WebSocket = null;
   let clientTimeout: number = null;
@@ -81,15 +81,15 @@ export function useWebsocket(timeout = 30000) {
       console.warn("当前浏览器不支持Websocket!");
       return;
     }
-    const id = "/" + uuid();
-    ws = new window.WebSocket(url + id);
+    const prefixId = `${import.meta.env.VITE_WS_PREFIX}/${uuid()}`;
+    ws = new window.WebSocket(baseURL + prefixId);
     ws.onopen = wsOpen;
     ws.onclose = wsClose;
     ws.onerror = wsError;
     window.onbeforeunload = wsDestroy;
     // 接入外部组件提供的onmessage监听回调
     ws.onmessage = wsMessage;
-    Cookies.set("socketId", id);
+    Cookies.set("socketId", prefixId);
   }
 
   onMounted(createWebsocket);

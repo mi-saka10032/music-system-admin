@@ -64,9 +64,10 @@ declare global {
     VITE_CDN: boolean;
     VITE_HIDE_HOME: string;
     VITE_COMPRESSION: ViteCompression;
-    VITE_GATEWAY_URL: string;
+    VITE_GATEWAY_PROXY: string;
+    VITE_WS_PROXY: string;
     VITE_GATEWAY_PREFIX: string;
-    VITE_WS_URL: string;
+    VITE_WS_PREFIX: string;
   }
 
   /**

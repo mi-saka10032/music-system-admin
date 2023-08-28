@@ -33,7 +33,9 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
     VITE_COMPRESSION,
     VITE_PUBLIC_PATH,
     VITE_GATEWAY_PREFIX,
-    VITE_GATEWAY_URL
+    VITE_GATEWAY_PROXY,
+    VITE_WS_PROXY,
+    VITE_WS_PREFIX
   } = warpperEnv(loadEnv(mode, root));
   return {
     base: VITE_PUBLIC_PATH,
@@ -42,6 +44,7 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
       alias
     },
     // 服务端渲染
+    // 仅适用于本地开发调试，proxy的代理模式可以作为线上环境nginx的代理参考
     server: {
       // 是否开启 https
       https: false,
@@ -50,7 +53,14 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
       host: "0.0.0.0",
       // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
       proxy: {
-        [VITE_GATEWAY_PREFIX]: VITE_GATEWAY_URL
+        [VITE_GATEWAY_PREFIX]: {
+          target: VITE_GATEWAY_PROXY,
+          changeOrigin: true
+        },
+        [VITE_WS_PREFIX]: {
+          target: VITE_WS_PROXY,
+          ws: true
+        }
       }
     },
     plugins: getPluginsList(command, VITE_CDN, VITE_COMPRESSION),

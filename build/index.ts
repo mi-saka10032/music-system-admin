@@ -8,9 +8,10 @@ const warpperEnv = (envConf: Recordable): ViteEnv => {
     VITE_CDN: false,
     VITE_HIDE_HOME: "false",
     VITE_COMPRESSION: "none",
-    VITE_GATEWAY_URL: "http://localhost:7001",
+    VITE_GATEWAY_PROXY: "http://localhost:7001",
+    VITE_WS_PROXY: "ws://localhost:7001",
     VITE_GATEWAY_PREFIX: "/api",
-    VITE_WS_URL: "ws://localhost:7001"
+    VITE_WS_PREFIX: "/socket"
   };
 
   for (const envName of Object.keys(envConf)) {
