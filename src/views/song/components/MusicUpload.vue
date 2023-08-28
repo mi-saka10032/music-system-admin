@@ -1,9 +1,10 @@
 <!-- 
-  核心上传组件
+  实验性组件：歌曲解析上传组件
   支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗
   由于上传时除了生成OSS链接之外，还会调用其他查询解析接口来查询歌曲关联信息，所以有一定等待时间
   这里采用的是el-upload的自动上传逻辑，因此每个上传文件都会独立调用upload接口，这样也有利于统计成功和失败数量
   所有的成功or失败响应返回之后，收集全部的成功数据emit到父组件中进行处理
+  warning：该组件涉及mp3文件直传服务器，文件流解析、上传OSS等大流量操作，在阿里云ECS上表现很差，受服务器带宽严重影响（上传几乎都不成功），仅建议本地代理使用
  -->
 <script setup lang="ts">
 import { shallowRef, ref, computed, watch } from "vue";
@@ -132,9 +133,12 @@ watch(waitingUploadCount, (newCount, oldCount) => {
   >
     <el-tooltip effect="light" placement="bottom" :enterable="false">
       <template #content>
-        <p class="text-sm text-gray-500 font-semibold">
+        <div class="text-sm text-gray-500 font-semibold">
           支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗
-        </p>
+          <div class="text-xl font-bold">
+            警告：建议仅在本地开发使用，远程上传严重受带宽影响
+          </div>
+        </div>
       </template>
       <el-button type="primary">智能上传解析歌曲</el-button>
     </el-tooltip>
@@ -142,9 +146,9 @@ watch(waitingUploadCount, (newCount, oldCount) => {
       <div
         class="el-upload__tip p-1 mr-2 !mt-0 border-2 border-red-400 font-semibold"
       >
-        格式限制: <span class="text-[14px]">{{ ACCEPT }}</span
-        >; 大小限制：<span class="text-[14px]">{{ MAX_SIZE_TEXT }}</span
-        >; 数量限制：<span class="text-[14px]">{{ LIMIT_COUNT }}</span>
+        格式限制: <span class="text-sm">{{ ACCEPT }}</span
+        >; 大小限制：<span class="text-sm">{{ MAX_SIZE_TEXT }}</span
+        >; 数量限制：<span class="text-sm">{{ LIMIT_COUNT }}</span>
       </div>
     </template>
   </el-upload>
