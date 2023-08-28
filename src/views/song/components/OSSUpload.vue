@@ -10,7 +10,6 @@ import {
 import { getSTSToken } from "@/api/song";
 import { message } from "@/utils/message";
 import { type UploadRequestOptions } from "element-plus";
-import OSS from "ali-oss"; // ali-oss只有CommonJS规范
 
 defineOptions({
   name: "OSSUpload"
@@ -56,7 +55,7 @@ onMounted(async () => {
   const data = await getSTSToken();
   console.log(data);
   downloadPrefix = data.region;
-  client = new OSS({
+  client = new window.OSS({
     region: "oss-cn-chengdu",
     accessKeyId: data.accessKeyId,
     accessKeySecret: data.accessKeySecret,
