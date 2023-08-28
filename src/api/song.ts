@@ -10,6 +10,7 @@ import {
 } from "@/music-api/dto/SongDTO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 import { SongVO } from "@/music-api/vo/SongVO";
+import { OSSSTSTokenVO } from "@/music-api/vo/OSSVO";
 
 /** page查询表单类型 */
 export type SongQueryForm = Omit<SongDTO, "id" | "pageNo" | "pageSize">;
@@ -49,6 +50,9 @@ export type DISASSOCIATIONSingerParam = Pick<
   Shelve_Singer_SongDTO,
   keyof Shelve_Singer_SongDTO
 >;
+
+/** 获取阿里云OSS上传配置出参 */
+export type OSSConfig = Pick<OSSSTSTokenVO, keyof OSSSTSTokenVO>;
 
 const songPrefix = "/song";
 
@@ -120,4 +124,9 @@ export const disassociation_singer_song = (data: DISASSOCIATIONSingerParam) => {
   return http.post<boolean>(`${songPrefix}/shelveSingerId`, {
     data
   });
+};
+
+/** 获取阿里云OSS-STSToken，用户客户端文件直传OSS */
+export const getSTSToken = () => {
+  return http.get<any>(`${songPrefix}/getSTS`);
 };

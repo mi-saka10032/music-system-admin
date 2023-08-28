@@ -16,7 +16,8 @@ import {
   updateSong,
   createSong,
   deleteSong,
-  batchCreateSongs
+  batchCreateSongs,
+  getSTSToken
 } from "@/api/song";
 import { type SingerParam, getSingerLists } from "@/api/singer";
 import { type AlbumParam, getAlbumLists } from "@/api/album";
@@ -30,8 +31,6 @@ import {
   addDialog,
   dialogStore
 } from "@/components/ReDialog";
-import SimpleForm from "@/components/SimpleForm/index.vue";
-import MusicUpload from "@/components/MusicUpload/index.vue";
 import { useScrollView } from "@/hooks/useScrollView";
 import { useWebsocket } from "@/hooks/useWebsocket";
 import { emitter } from "@/utils/mitt";
@@ -43,6 +42,8 @@ import {
   UploadFilled,
   MagicStick
 } from "@element-plus/icons-vue";
+import SimpleForm from "@/components/SimpleForm/index.vue";
+import MusicUpload from "./components/MusicUpload.vue";
 
 defineOptions({
   name: "Song"
@@ -143,7 +144,17 @@ const createDialog = reactive<DialogOptions>({
       formColumns={createFormColumns}
       showButton={false}
       isFlex={false}
-    />
+    >
+      {{
+        ossUpload: () => (
+          <el-input v-model={createForm.musicUrl}>
+            {{
+              append: () => <el-upload />
+            }}
+          </el-input>
+        )
+      }}
+    </SimpleForm>
   ),
   beforeSure: async (done: Function) => {
     await createSong(createForm);
@@ -512,6 +523,13 @@ onMounted(() => {
   querySingerLists();
   queryAlbumLists();
   emitter.on("websocketMessage", updateSongProgress);
+  getSTSToken()
+    .then(res => {
+      console.log(res);
+    })
+    .catch((error: any) => {
+      console.log(error);
+    });
 });
 
 onBeforeUnmount(() => {

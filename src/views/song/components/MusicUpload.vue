@@ -7,7 +7,14 @@
  -->
 <script setup lang="ts">
 import { shallowRef, ref, computed, watch } from "vue";
-import { formatToken, getToken } from "@/utils/auth";
+import {
+  UPLOAD_URL,
+  HEADERS,
+  MAX_SIZE_TEXT,
+  ACCEPT,
+  LIMIT_COUNT,
+  uploadSizeJudge
+} from "./uploadConstant";
 import { message } from "@/utils/message";
 import { type UploadProps, ElLoading } from "element-plus";
 import { ErrorCode } from "@/music-api/code/ErrorCode";
@@ -26,16 +33,6 @@ interface LoadingService {
   close: () => void;
 }
 
-// 上传常量
-const UPLOAD_URL = "/api/song/upload";
-const HEADERS = {
-  Authorization: formatToken(getToken()?.accessToken || "")
-};
-const MAX_SIZE = 256 * 1024 * 1024;
-const MAX_SIZE_TEXT = "256MB";
-const ACCEPT = ".mp3";
-const LIMIT_COUNT = 10;
-
 // 等待上传文件计数 成功计数 失败计数 Loading实例
 const waitingUploadCount = ref(0);
 const successfulUploadCount = ref(0);
@@ -51,17 +48,11 @@ const failCount = () => (failureUploadCount.value += 1);
 // 成功回调数据收集列表
 const successfulNewSongs = shallowRef<Array<SongCreate>>([]);
 
-/** 上传前回调，拒绝大体积文件上传，避免上传堵塞 */
 const beforeUploadHandler: UploadProps["beforeUpload"] = rawFile => {
-  const { name, size } = rawFile;
-  if (size > MAX_SIZE) {
-    message(`${name}文件超出${MAX_SIZE_TEXT}大小限制，已取消上传`, {
-      type: "error"
-    });
-    return false;
-  }
-  beforeUploadCount();
-  return true;
+  const flag = uploadSizeJudge(rawFile);
+  // 判断为true才调用上传计数，返回true才回正常上传执行
+  flag && beforeUploadCount();
+  return flag;
 };
 
 /** 成功回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 成功计数+1 */
