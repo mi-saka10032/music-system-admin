@@ -14,7 +14,7 @@ import type {
   SongCreate
 } from "@/api/song";
 
-type MusicStoreId = "admin-music";
+type MusicStoreId = "music-admin";
 
 export interface OptionValue {
   label: string;
@@ -78,7 +78,7 @@ export const useMusicStore = defineStore<
   MusicState,
   MusicGetters
 >({
-  id: "admin-music",
+  id: "music-admin",
   state: () => ({
     // 歌手表格配置
     singerTableColumns: [

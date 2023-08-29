@@ -14,11 +14,13 @@ export interface TabItem {
   list: ListItem[];
 }
 
+// 注释部分通知内容;
 export const noticesData: TabItem[] = [
   {
     key: "1",
     name: "通知",
-    list: [
+    list: []
+    /* list: [
       {
         avatar:
           "https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png",
@@ -68,9 +70,9 @@ export const noticesData: TabItem[] = [
         description: "",
         type: "1"
       }
-    ]
-  },
-  {
+    ] */
+  }
+  /* {
     key: "2",
     name: "消息",
     list: [
@@ -142,5 +144,5 @@ export const noticesData: TabItem[] = [
         type: "3"
       }
     ]
-  }
+  } */
 ];

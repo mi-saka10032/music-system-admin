@@ -1,0 +1,1 @@
+import{aU as t,aV as n,ax as r}from"./index-b0f6dbf0.js";const i="/api/song/upload";var s;const p={Authorization:t(((s=n())==null?void 0:s.accessToken)||"")},c=256*1024*1024,u="256MB",A=".mp3",m=10,E=a=>{const{name:o,size:e}=a;return e>c?(r(`${o}文件超出${u}大小限制，已取消上传`,{type:"error"}),!1):!0};export{A,p as H,m as L,u as M,i as U,E as u};

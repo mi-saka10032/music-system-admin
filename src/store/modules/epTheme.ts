@@ -4,7 +4,7 @@ import { storageLocal } from "@pureadmin/utils";
 import { getConfig, responsiveStorageNameSpace } from "@/config";
 
 export const useEpThemeStore = defineStore({
-  id: "pure-epTheme",
+  id: "music-epTheme",
   state: () => ({
     epThemeColor:
       storageLocal().getItem<StorageConfigs>(

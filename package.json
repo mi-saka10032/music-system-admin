@@ -1,6 +1,6 @@
 {
-  "name": "pure-admin-thin",
-  "version": "4.5.0",
+  "name": "music-manage-system",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit && vue-tsc --noEmit --skipLibCheck",
@@ -132,8 +132,8 @@
       "stable": "*"
     }
   },
-  "repository": "git@github.com:pure-admin/pure-admin-thin.git",
-  "author": "xiaoxian521",
+  "repository": "git@github.com:mi-saka10032/music-system-admin.git",
+  "author": "mi-saka10032",
   "license": "MIT",
   "lint-staged": {
     "ignore": [
