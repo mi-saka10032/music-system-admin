@@ -78,3 +78,7 @@ pnpm serve
 加载完成后打开 <http://localhost:8848> 访问
 
 **注意：**该项目的前端对接接口功能完整，请拉取[jay-music-manage-system](https://github.com/mi-saka10032/jay-music-manage-system.git)，按照步骤启动后端接口后，再访问前端项目
+
+## 许可证
+
+[MIT © 2023-present, mi-saka10032](./LICENSE)
