@@ -6,7 +6,7 @@ import { responsiveStorageNameSpace } from "@/config";
 import { isEqual, isBoolean, isUrl, storageLocal } from "@pureadmin/utils";
 
 export const useMultiTagsStore = defineStore({
-  id: "pure-multiTags",
+  id: "music-multiTags",
   state: () => ({
     // 存储标签页信息（路由信息）
     multiTags: storageLocal().getItem<StorageConfigs>(

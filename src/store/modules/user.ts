@@ -10,7 +10,7 @@ import { type DataInfo, setToken, removeToken, sessionKey } from "@/utils/auth";
 import type { LoginResult } from "@/api/user";
 
 export const useUserStore = defineStore({
-  id: "pure-user",
+  id: "music-user",
   state: (): userType => ({
     // 用户名
     username:

@@ -5,7 +5,7 @@ import { getConfig, responsiveStorageNameSpace } from "@/config";
 import { deviceDetection, storageLocal } from "@pureadmin/utils";
 
 export const useAppStore = defineStore({
-  id: "pure-app",
+  id: "music-app",
   state: (): appType => ({
     sidebar: {
       opened:

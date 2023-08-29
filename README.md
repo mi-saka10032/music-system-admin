@@ -1,40 +1,80 @@
-<h1>vue-pure-admin精简版（非国际化版本）</h1>
+<h1>music-system-admin 一款简约的音乐管理系统</h1>
 
-[![license](https://img.shields.io/github/license/pure-admin/vue-pure-admin.svg)](LICENSE)
+## 来源
 
-**中文** | [English](./README.en-US.md)
+系统模板参考自 [vue-admin-thin](https://github.com/pure-admin/pure-admin-thin) ，非常感谢 pure 提供的项目灵感、齐全的基础功能和高自由度开发。
+
+因为不需要太过复杂的组件和依赖，所以没有选用功能更完整的 [vue-pure-admin](https://github.com/pure-admin/vue-pure-admin)。
 
 ## 介绍
 
-精简版是基于 [vue-pure-admin](https://github.com/pure-admin/vue-pure-admin) 提炼出的架子，包含主体功能，更适合实际项目开发，打包后的大小在全局引入 [element-plus](https://element-plus.org) 的情况下仍然低于 `2.3MB`，并且会永久同步完整版的代码。开启 `brotli` 压缩和 `cdn` 替换本地库模式后，打包大小低于 `350kb`
+整体功能：歌手管理、专辑管理和歌曲管理
 
-## 版本选择
+#### 歌手管理
 
-当前是非国际化版本，如果您需要国际化版本 [请点击](https://github.com/pure-admin/pure-admin-thin/tree/i18n)
+歌手信息的增删改查，支持勾选批量删除，每个歌手可查看关联的歌曲信息，支持歌曲与歌手解除关联
 
-## 配套视频
+### 专辑管理
 
-- [点我查看教程](https://www.bilibili.com/video/BV1kg411v7QT)
-- [点我查看 UI 设计](https://www.bilibili.com/video/BV17g411T7rq)
+专辑信息的增删改查，支持勾选批量删除，每个专辑可查看关联的歌曲信息，支持专辑与歌手解除关联
 
-## 配套保姆级文档
+### 歌曲管理
 
-- [查看文档](https://yiming_chang.gitee.io/pure-admin-doc)
+1. 歌曲信息的增删改查，支持勾选批量删除
+2. 新增歌曲时支持阿里云 OSS 客户端直传，可生成有效的阿里云链接录入新增数据
+3. 【实验性功能】
+   - 提供可批量上传的歌曲信息解析功能，歌曲文件上传至服务器后可解析歌曲基本信息，生成相关字段，同时自动上传阿里云 OSS 生成链接，并通过网易云 API 查询详细信息完成填充
+   - 整个过程会开启 Websocket 监听上传进度，自动弹出步骤条弹窗
+   - 批量上传完成后，关闭步骤条弹窗，会跟随弹出上传解析成功的歌曲信息弹窗，可对内部信息做二次编辑，随后可批量新增歌曲
+   - 注意：由于该功能需要将文件上传至后端服务器，上传和解析进度受服务器带宽影响很大，仅建议本地开发使用，远程线上环境慎用
 
-## 预览
+## 关联仓库地址
 
-- [查看预览](https://pure-admin-thin.netlify.app/#/login)
+后端仓库：<https://github.com/mi-saka10032/jay-music-manage-system.git>
 
-## 维护者
+类型仓库：<https://github.com/mi-saka10032/music-api.git>
 
-[xiaoxian521](https://github.com/xiaoxian521)
+后端项目也是使用 Typescript 开发，所以前后端仓库共用同一个类型数据（DTO、VO）子仓库
 
-## ⚠️ 注意
+## 环境要求
 
-- 精简版不接受任何 `issues` 和 `pr`，如果有问题请到完整版 [issues](https://github.com/pure-admin/vue-pure-admin/issues/new/choose) 去提，谢谢！
+开发环境：建议 Node 版本>16 以上
 
-## 许可证
+包管理器：only pnpm，请使用 pnpm 安装启动项目
 
-原则上不收取任何费用及版权，可商用，不过如需二次开源（比如用此平台二次开发并开源，要求前端代码必须开源免费）请联系作者获取许可！（免费，走个记录而已）
+```bash
+npm install -g pnpm
+```
 
-[MIT © 2020-present, pure-admin](./LICENSE)
+## 安装
+
+### 克隆项目
+
+```bash
+git clone git@github.com:mi-saka10032/music-system-admin.git
+
+# 项目里有git子仓库，需要初始化并更新子仓库内容
+# 这个指令只在第一次克隆时使用
+git submodule init
+
+# 更新子仓库内容到最新分支记录
+git submodule update
+```
+
+执行完 submodule 命令后如果`src/music-api`目录下不为空则子仓库拉取成功
+
+### 安装依赖
+
+```bash
+pnpm install
+```
+
+## 启动
+
+```bash
+pnpm serve
+```
+
+加载完成后打开 <http://localhost:8848> 访问
+
+**注意：**该项目的前端对接接口功能完整，请拉取[jay-music-manage-system](https://github.com/mi-saka10032/jay-music-manage-system.git)，按照步骤启动后端接口后，再访问前端项目
