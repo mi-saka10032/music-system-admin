@@ -16,6 +16,18 @@
 
 </div>
 
+## 效果图
+
+![music-loginPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-loginPage.png)
+
+![music-welcomePage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-welcomePage.png)
+
+![music-albumPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-albumPage.png)
+
+![music-songPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-songPage.png)
+
+![music-uploadProgressDialog](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-uploadProgressDialog.png)
+
 ## 介绍
 
 整体功能：歌手管理、专辑管理和歌曲管理
