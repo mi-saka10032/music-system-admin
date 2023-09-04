@@ -6,6 +6,28 @@
 
 因为不需要太过复杂的组件和依赖，所以没有选用功能更完整的 [vue-pure-admin](https://github.com/pure-admin/vue-pure-admin)。
 
+<div style="text-align: center">
+
+[![Vue](https://img.shields.io/badge/vue-3.x-brightgreen)](https://cn.vuejs.org/)
+[![Vite](https://img.shields.io/badge/vite-4.x-brightgreen)](https://vitejs.cn/)
+[![Typescript](https://img.shields.io/badge/typescript-5.x-brightgreen)](https://www.tslang.cn/docs/home.html)
+[![TailwindCSS](https://img.shields.io/badge/tailwindcss-3.x-brightgreen)](https://www.tailwindcss.cn/)
+[![MIT](https://img.shields.io/badge/LISENCE-MIT-blue)](./LICENSE)
+
+</div>
+
+## 效果图
+
+![music-loginPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-loginPage.png)
+
+![music-welcomePage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-welcomePage.png)
+
+![music-albumPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-albumPage.png)
+
+![music-songPage](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-songPage.png)
+
+![music-uploadProgressDialog](https://misaka10032.oss-cn-chengdu.aliyuncs.com/midway/music-uploadProgressDialog.png)
+
 ## 介绍
 
 整体功能：歌手管理、专辑管理和歌曲管理

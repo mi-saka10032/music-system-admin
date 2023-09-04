@@ -3,7 +3,6 @@ import { onMounted } from "vue";
 import {
   UPLOAD_URL,
   HEADERS,
-  ACCEPT,
   MAX_SIZE_TEXT,
   uploadSizeJudge
 } from "./uploadConstant";
@@ -16,6 +15,16 @@ defineOptions({
 });
 
 const emit = defineEmits(["progress", "success"]);
+
+const multi_accept = [
+  ".wav",
+  ".flac",
+  ".aac",
+  ".ogg",
+  ".aiff",
+  ".wma",
+  ".mp3"
+].join(",");
 
 let client = null;
 
@@ -80,7 +89,7 @@ onMounted(async () => {
     :action="UPLOAD_URL"
     :headers="HEADERS"
     :show-file-list="false"
-    :accept="ACCEPT"
+    :accept="multi_accept"
     :before-upload="uploadSizeJudge"
     :http-request="uploadOSS"
   >
