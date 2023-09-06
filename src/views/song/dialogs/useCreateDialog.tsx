@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from "vue";
+import { reactive } from "vue";
 import { useCreate } from "@/hooks/useForm";
 import { useMusicStoreHook } from "@/store/modules/music";
 import { createSong } from "@/api/song";
@@ -31,21 +31,6 @@ export function useCreateDialog(sureCallback: Function) {
       useMusicStoreHook().songCreateFormColumns
     );
 
-  /** 阿里云OSS文件上传进度百分比 */
-  const ossProgress = ref(0);
-
-  /** 阿里云OSS文件上传进度状态 */
-  const ossStatus = computed(() => {
-    const progress = ossProgress.value;
-    if (progress >= 0 && progress <= 50) {
-      return "exception";
-    } else if (progress > 50 && progress < 100) {
-      return "warning";
-    } else if (progress >= 100) {
-      return "success";
-    } else return "";
-  });
-
   /** 歌曲新增详情弹窗 */
   const createDialog = reactive<DialogOptions>({
     title: "歌曲信息新增",
@@ -57,30 +42,7 @@ export function useCreateDialog(sureCallback: Function) {
         isFlex={false}
       >
         {{
-          ossUpload: () => (
-            <div class="w-full">
-              <el-input v-model={createForm.musicUrl}>
-                {{
-                  append: () => (
-                    <OSSUpload
-                      onProgress={(p: string) =>
-                        (ossProgress.value = Number(p))
-                      }
-                      onSuccess={(url: string) => (createForm.musicUrl = url)}
-                    />
-                  )
-                }}
-              </el-input>
-              <el-progress
-                class="mt-1"
-                style={{ display: ossProgress.value > 0 ? "flex" : "none" }}
-                text-inside
-                stroke-width={16}
-                percentage={ossProgress.value}
-                status={ossStatus.value}
-              />
-            </div>
-          )
+          ossUpload: () => <OSSUpload v-model={createForm.musicUrl} />
         }}
       </SimpleForm>
     ),
@@ -89,9 +51,6 @@ export function useCreateDialog(sureCallback: Function) {
       createSuccessMsg();
       done();
       sureCallback && sureCallback();
-    },
-    closeCallBack: () => {
-      ossProgress.value = 0;
     }
   });
 
