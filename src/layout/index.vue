@@ -7,6 +7,7 @@ import { useLayout } from "./hooks/useLayout";
 import { useResizeObserver } from "@vueuse/core";
 import { useAppStoreHook } from "@/store/modules/app";
 import { useSettingStoreHook } from "@/store/modules/settings";
+import { useOSSStoreHook } from "@/store/modules/oss";
 import { deviceDetection, useDark, useGlobal } from "@pureadmin/utils";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import {
@@ -111,6 +112,8 @@ onMounted(() => {
   if (isMobile) {
     toggle("mobile", false);
   }
+  // 初始化全局的阿里云OSS实例
+  useOSSStoreHook().initOSS();
 });
 
 onBeforeMount(() => {

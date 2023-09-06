@@ -5,6 +5,7 @@ import { updateSong } from "@/api/song";
 import type { SongUpdate } from "@/api/song";
 import type { DialogOptions } from "@/components/ReDialog";
 import SimpleForm from "@/components/SimpleForm/index.vue";
+import OSSUpload from "../components/OSSUpload.vue";
 
 export function useUpdateDialog(sureCallback: Function) {
   const { updateForm, updateFormColumns, resetUpdateForm, updateSuccessMsg } =
@@ -31,7 +32,11 @@ export function useUpdateDialog(sureCallback: Function) {
         formColumns={updateFormColumns}
         showButton={false}
         isFlex={false}
-      />
+      >
+        {{
+          ossUpload: () => <OSSUpload v-model={updateForm.musicUrl} />
+        }}
+      </SimpleForm>
     ),
     beforeSure: async (done: Function) => {
       await updateSong(updateForm);

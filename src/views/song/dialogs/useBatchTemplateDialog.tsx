@@ -11,6 +11,7 @@ import {
 } from "@/music-api/code/SocketSongEnum";
 import { message } from "@/utils/message";
 import SimpleForm from "@/components/SimpleForm/index.vue";
+import OSSUpload from "../components/OSSUpload.vue";
 import {
   Back,
   Right,
@@ -83,6 +84,7 @@ export function useBatchTemplateDialog(sureCallback: Function) {
               isFlex={false}
             >
               {{
+                ossUpload: () => <OSSUpload v-model:value={item.musicUrl} />,
                 embedAlbum: () => (
                   <SimpleForm
                     class="embed_album w-full"
