@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import { emitter } from "@/utils/mitt";
 import { formatDateWithAny, formatDuration } from "@/utils/formatTime";
 import { cloneDeep } from "@pureadmin/utils";
-import { type UnwrapRef } from "vue";
 import type { TableColumns } from "@pureadmin/table";
 import type { SingerResult, SingerQueryForm } from "@/api/singer";
 import type { AlbumResult, AlbumQueryForm, AlbumDetail } from "@/api/album";
@@ -13,8 +12,6 @@ import type {
   SongUpdate,
   SongCreate
 } from "@/api/song";
-
-type MusicStoreId = "music-admin";
 
 export interface OptionValue {
   label: string;
@@ -59,27 +56,9 @@ export interface MusicState {
   songDetailFormColumns: FormColumnTypeList<SongUpdate>;
 }
 
-/** 强约束所有Columns配置项prop字段 */
-export interface MusicGetters {
-  [key: string]: any;
-  songCreateFormColumns: (
-    state: UnwrapRef<MusicState>
-  ) => FormColumnTypeList<SongCreate>;
-  songTemplateCreateFormColumns: (
-    state: UnwrapRef<MusicState>
-  ) => FormColumnTypeList<SongCreate>;
-  relatedSongsTableColumns: (
-    state: UnwrapRef<MusicState>
-  ) => TableColumnTypeList<SongResult>;
-}
-
-export const useMusicStore = defineStore<
-  MusicStoreId,
-  MusicState,
-  MusicGetters
->({
+export const useMusicStore = defineStore({
   id: "music-admin",
-  state: () => ({
+  state: (): MusicState => ({
     // 歌手表格配置
     singerTableColumns: [
       { type: "selection" },
@@ -308,9 +287,10 @@ export const useMusicStore = defineStore<
         prop: "lyric"
       },
       {
-        type: "input",
+        type: "slot",
         label: "链接",
-        prop: "musicUrl"
+        prop: "musicUrl",
+        slot: "ossUpload"
       },
       {
         type: "select",
@@ -341,18 +321,10 @@ export const useMusicStore = defineStore<
   }),
   getters: {
     // 歌曲新增详情表单配置，新增歌手简化为单选模式
-    songCreateFormColumns: state => {
+    songCreateFormColumns: (state): FormColumnTypeList<SongCreate> => {
       const columns: FormColumnTypeList<SongCreate> = cloneDeep(
         state.songDetailFormColumns
       );
-      // 新增表单改为slot 上传OSS返回链接
-      columns.splice(2, 1, {
-        type: "slot",
-        label: "链接",
-        prop: "musicUrl",
-        slot: "ossUpload",
-        placeholder: "请上传文件后待返回OSS链接"
-      });
       columns.splice(4, 1, {
         type: "select",
         label: "新增歌手",
@@ -363,7 +335,7 @@ export const useMusicStore = defineStore<
       return columns;
     },
     // 模板歌曲新增详情表单配置，新增歌手和新增专辑变更为 歌手和专辑 的表单配置 空出slot插槽
-    songTemplateCreateFormColumns: state => {
+    songTemplateCreateFormColumns: (state): FormColumnTypeList<SongCreate> => {
       const columns: FormColumnTypeList<SongCreate> = cloneDeep(
         state.songDetailFormColumns
       );
@@ -386,7 +358,7 @@ export const useMusicStore = defineStore<
       return columns;
     },
     // 专辑/歌手 关联歌曲表格配置，相比歌曲完整表格配置删减了一部分
-    relatedSongsTableColumns: state => {
+    relatedSongsTableColumns: (state): TableColumnTypeList<SongResult> => {
       const columns: TableColumnTypeList<SongResult> = cloneDeep(
         state.songTableColumns
       );
