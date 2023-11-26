@@ -20,7 +20,13 @@ import { message } from "@/utils/message";
 import { type UploadProps, ElLoading } from "element-plus";
 import { ErrorCode } from "@/music-api/code/ErrorCode";
 import type SystemResponse from "@/music-api/code/SystemResponse";
-import type { SongCreate } from "@/api/song";
+import {
+  type SongCreate,
+  type OSSCreate,
+  getOSSAnalysisResult
+} from "@/api/song";
+import { useOSS } from "@/hooks/useOSS";
+import { type UploadRequestOptions } from "element-plus";
 
 defineOptions({
   name: "MusicUpload"
@@ -28,27 +34,41 @@ defineOptions({
 
 const emit = defineEmits(["generate-new-songs"]);
 
-/** 模拟ElLoading.service返回值的接口类型 element-plus不支持提供这个类型 */
+/** 通用：模拟ElLoading.service返回值的接口类型 element-plus不支持提供这个类型 */
 interface LoadingService {
   setText: (text: string) => void;
   close: () => void;
 }
 
-// 等待上传文件计数 成功计数 失败计数 Loading实例
+// 通用：上传配置项
+const loadingOption = {
+  lock: true,
+  text: "上传解析歌曲中...",
+  background: "rgba(0, 0, 0, 0.7)"
+};
+
+// 通用：上传提示信息
+const liveFilesAnnouncement = computed(
+  () =>
+    `上传解析歌曲中... 等待数：${waitingUploadCount.value} 成功数：${successfulUploadCount.value} 失败数：${failureUploadCount.value}`
+);
+
+// 通用：等待上传文件计数 成功计数 失败计数 Loading实例
 const waitingUploadCount = ref(0);
 const successfulUploadCount = ref(0);
 const failureUploadCount = ref(0);
 const loadingInstance = shallowRef<LoadingService>(null);
 
-// 计数方法
+// 通用：计数方法
 const beforeUploadCount = () => (waitingUploadCount.value += 1);
 const completedUploadCount = () => (waitingUploadCount.value -= 1);
 const succeedCount = () => (successfulUploadCount.value += 1);
 const failCount = () => (failureUploadCount.value += 1);
 
-// 成功回调数据收集列表
+// 通用：成功回调数据收集列表
 const successfulNewSongs = shallowRef<Array<SongCreate>>([]);
 
+// 通用：上传前回调，多文件上传前计数
 const beforeUploadHandler: UploadProps["beforeUpload"] = rawFile => {
   const flag = uploadSizeJudge(rawFile);
   // 判断为true才调用上传计数，返回true才回正常上传执行
@@ -56,7 +76,7 @@ const beforeUploadHandler: UploadProps["beforeUpload"] = rawFile => {
   return flag;
 };
 
-/** 成功回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 成功计数+1 */
+/** 旧上传组件：成功回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 成功计数+1 */
 const onSuccessResponse: UploadProps["onSuccess"] = (
   response: SystemResponse<Array<SongCreate>>
 ) => {
@@ -71,29 +91,65 @@ const onSuccessResponse: UploadProps["onSuccess"] = (
   }
 };
 
-/** 失败回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 失败计数+1 */
+/** 旧上传组件：失败回调，成功和失败回调触发次数之和等于上传回调触发次数 上传计数-1 失败计数+1 */
 const onErrorResponse: UploadProps["onError"] = error => {
   completedUploadCount();
   failCount();
   message(error.message, { type: "error" });
 };
 
-const loadingOption = {
-  lock: true,
-  text: "上传解析歌曲中...",
-  background: "rgba(0, 0, 0, 0.7)"
-};
+/** 新上传组件：使用OSS */
+const { client, downloadPrefix } = useOSS();
 
-const liveFilesAnnouncement = computed(
-  () =>
-    `上传解析歌曲中... 等待数：${waitingUploadCount.value} 成功数：${successfulUploadCount.value} 失败数：${failureUploadCount.value}`
-);
+/** 新上传组件：OSS链接数据收集 */
+const ossData = shallowRef<OSSCreate[]>([]);
+
+/** 批量上传阿里云OSS函数 */
+async function batchUploadOSS(item: UploadRequestOptions) {
+  if (client.value) {
+    const originalName = item.file.name;
+    // 1. 根据{时间戳-原始文件名}生成唯一的文件名
+    const filename = `${Date.now()}-${originalName}`;
+    try {
+      // 2.分片上传
+      const result = await client.value.multipartUpload(
+        `/music/${filename}`,
+        item.file
+      );
+      // 3.根据结果name获取签名url（真正的可下载链接）
+      let downloadUrl = "";
+      if (result.name && result?.res.status === 200) {
+        downloadUrl = downloadPrefix.value + result.name;
+      }
+      if (downloadUrl.length > 0) {
+        // 生成的OSS链接有效，推入ossData等待统一上传调用分析接口
+        ossData.value.push({
+          ossPath: downloadUrl,
+          filename: originalName
+        });
+        completedUploadCount();
+        succeedCount();
+      } else {
+        completedUploadCount();
+        failCount();
+      }
+    } catch (error: any) {
+      completedUploadCount();
+      failCount();
+      console.log(error);
+    }
+  } else {
+    completedUploadCount();
+    failCount();
+    message("获取阿里云OSS实例失败，请刷新后重试", { type: "error" });
+  }
+}
 
 /** 监听等待上传文件计数，
  * newCount大于0 -> loading为null则开启loading，loading实例持续更新计数信息
  * oldCount等于0 -> 起始清空数据收集列表
  * newCount等于0 -> 末尾关闭loading 清空成功和失败计数 抛送数据收集列表 */
-watch(waitingUploadCount, (newCount, oldCount) => {
+watch(waitingUploadCount, async (newCount, oldCount) => {
   if (newCount > 0) {
     if (loadingInstance.value === null) {
       loadingInstance.value = ElLoading.service(loadingOption);
@@ -101,6 +157,7 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     loadingInstance.value.setText(liveFilesAnnouncement.value);
   }
   if (oldCount === 0) {
+    ossData.value = [];
     successfulNewSongs.value = [];
   }
   if (newCount === 0) {
@@ -111,6 +168,12 @@ watch(waitingUploadCount, (newCount, oldCount) => {
     message(`上传解析已完成，成功${successfulCount}个，失败${failureCount}个`);
     successfulUploadCount.value = 0;
     failureUploadCount.value = 0;
+    // 通过判断ossData的情况，确认是否使用了新上传组件。长度不为0的情况下，批量调用接口解析oss歌曲链接
+    if (ossData.value.length > 0) {
+      successfulNewSongs.value = await Promise.all(
+        ossData.value.map(data => getOSSAnalysisResult(data))
+      );
+    }
     if (successfulNewSongs.value.length > 0) {
       emit("generate-new-songs", successfulNewSongs.value);
     }
@@ -119,37 +182,60 @@ watch(waitingUploadCount, (newCount, oldCount) => {
 </script>
 
 <template>
-  <el-upload
-    class="flex flex-row-reverse items-center mb-4"
-    :action="UPLOAD_URL"
-    :headers="HEADERS"
-    :show-file-list="false"
-    multiple
-    :accept="ACCEPT"
-    :limit="LIMIT_COUNT"
-    :before-upload="beforeUploadHandler"
-    :on-success="onSuccessResponse"
-    :on-error="onErrorResponse"
-  >
-    <el-tooltip effect="light" placement="bottom" :enterable="false">
-      <template #content>
-        <div class="text-sm text-gray-500 font-semibold">
-          支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗
-          <div class="text-xl font-bold">
-            警告：建议仅在本地开发使用，远程上传严重受带宽影响
+  <div class="flex justify-end">
+    <el-upload
+      class="flex flex-row-reverse items-center mb-4"
+      :action="UPLOAD_URL"
+      :headers="HEADERS"
+      :show-file-list="false"
+      multiple
+      :accept="ACCEPT"
+      :limit="LIMIT_COUNT"
+      :before-upload="beforeUploadHandler"
+      :on-success="onSuccessResponse"
+      :on-error="onErrorResponse"
+    >
+      <el-tooltip effect="light" placement="bottom" :enterable="false">
+        <template #content>
+          <div class="text-sm text-gray-500 font-semibold">
+            支持批量上传mp3文件，生成OSS链接并自动解析出歌曲相关信息，生成新增歌曲信息弹窗
+            <div class="text-xl font-bold">
+              警告：建议仅在本地开发使用，远程上传严重受带宽影响
+            </div>
           </div>
+        </template>
+        <el-button type="primary">智能上传解析歌曲</el-button>
+      </el-tooltip>
+      <template #tip>
+        <div
+          class="el-upload__tip p-1 mr-2 !mt-0 border-2 border-red-400 font-semibold"
+        >
+          格式限制: <span class="text-sm">{{ ACCEPT }}</span
+          >; 大小限制：<span class="text-sm">{{ MAX_SIZE_TEXT }}</span
+          >; 数量限制：<span class="text-sm">{{ LIMIT_COUNT }}</span>
         </div>
       </template>
-      <el-button type="primary">智能上传解析歌曲</el-button>
-    </el-tooltip>
-    <template #tip>
-      <div
-        class="el-upload__tip p-1 mr-2 !mt-0 border-2 border-red-400 font-semibold"
-      >
-        格式限制: <span class="text-sm">{{ ACCEPT }}</span
-        >; 大小限制：<span class="text-sm">{{ MAX_SIZE_TEXT }}</span
-        >; 数量限制：<span class="text-sm">{{ LIMIT_COUNT }}</span>
-      </div>
-    </template>
-  </el-upload>
+    </el-upload>
+    <el-upload
+      class="ml-2"
+      multiple
+      :action="UPLOAD_URL"
+      :headers="HEADERS"
+      :show-file-list="false"
+      :accept="ACCEPT"
+      :before-upload="beforeUploadHandler"
+      :http-request="batchUploadOSS"
+    >
+      <el-tooltip effect="light" placement="bottom" :enterable="false">
+        <template #content>
+          <div class="text-sm text-gray-500 font-semibold">
+            <div>支持批量上传mp3文件，更改为浏览器上传至OSS生成链接</div>
+            <div>服务器读取并解析出歌曲相关信息，生成新增歌曲信息弹窗</div>
+            <div class="text-xl font-bold">推荐使用</div>
+          </div>
+        </template>
+        <el-button type="primary">智能上传解析歌曲（新）</el-button>
+      </el-tooltip>
+    </el-upload>
+  </div>
 </template>
