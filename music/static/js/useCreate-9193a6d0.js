@@ -1,1 +1,0 @@
-import{D as n,Y as t,ax as c}from"./index-a4230535.js";import{r as m}from"./resetForm-951c0337.js";function F(e,r){const a=n(e),s=t(e),o=t(r);return{createForm:s,createFormColumns:o,resetCreateForm:()=>m(s,a),createSuccessMsg:()=>c("新增成功",{type:"success"}),batchCreateSuccessMsg:()=>c("批量新增成功",{type:"success"})}}export{F as u};
