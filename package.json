@@ -6,7 +6,7 @@
     "typecheck": "tsc --noEmit && vue-tsc --noEmit --skipLibCheck",
     "dev": "NODE_OPTIONS=--max-old-space-size=4096 vite",
     "serve": "pnpm typecheck && pnpm dev",
-    "build": "rimraf dist && NODE_OPTIONS=--max-old-space-size=8192 vite build",
+    "build": "rimraf music && NODE_OPTIONS=--max-old-space-size=8192 vite build",
     "build:staging": "rimraf dist && vite build --mode staging",
     "report": "rimraf dist && vite build",
     "preview": "vite preview",
@@ -134,5 +134,10 @@
   },
   "repository": "git@github.com:mi-saka10032/music-system-admin.git",
   "author": "mi-saka10032",
-  "license": "MIT"
+  "license": "MIT",
+  "lint-staged": {
+    "ignore": [
+      "music/**/*"
+    ]
+  }
 }
