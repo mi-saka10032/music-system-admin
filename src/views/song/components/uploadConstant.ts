@@ -10,7 +10,7 @@ export const HEADERS = {
 };
 export const MAX_SIZE = 256 * 1024 * 1024;
 export const MAX_SIZE_TEXT = "256MB";
-export const ACCEPT = ".mp3";
+export const ACCEPT = ".mp3, .flac";
 export const LIMIT_COUNT = 10;
 
 /** 超大文件判断 */
