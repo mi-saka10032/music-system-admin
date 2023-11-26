@@ -6,7 +6,8 @@ import {
   Relation_Album_SongDTO,
   Relation_Singer_SongDTO,
   Shelve_Album_SongDTO,
-  Shelve_Singer_SongDTO
+  Shelve_Singer_SongDTO,
+  OSSDTO
 } from "@/music-api/dto/SongDTO";
 import { PageVOClass } from "@/music-api/vo/PageVO";
 import { SongVO } from "@/music-api/vo/SongVO";
@@ -20,6 +21,9 @@ export type SongUpdate = Pick<UpdateSongDTO, keyof UpdateSongDTO>;
 
 /** 新增参数类型 */
 export type SongCreate = Pick<NewSongDTO, keyof NewSongDTO>;
+
+/** OSS上传参数类型 */
+export type OSSCreate = Pick<OSSDTO, keyof OSSDTO>;
 
 /** page查询入参类型 */
 export type SongParam = Omit<SongDTO, "id">;
@@ -58,75 +62,60 @@ const songPrefix = "/song";
 
 /** 获取歌曲列表 */
 export const getSongLists = (data: SongParam) => {
-  return http.post<SongResultList>(`${songPrefix}/page`, {
-    data
-  });
+  return http.post<SongResultList>(`${songPrefix}/page`, { data });
 };
 
 /** 获取歌曲详情 */
 export const getSongDetail = (id: number) => {
-  return http.post<SongResult>(`${songPrefix}/findById`, {
-    params: { id }
-  });
+  return http.post<SongResult>(`${songPrefix}/findById`, { params: { id } });
 };
 
 /** 更新歌曲信息 */
 export const updateSong = (data: SongUpdate) => {
-  return http.post<SongResult>(`${songPrefix}/update`, {
-    data
-  });
+  return http.post<SongResult>(`${songPrefix}/update`, { data });
 };
 
 /** 创建歌曲信息 */
 export const createSong = (data: SongCreate) => {
-  return http.post<SongResult>(`${songPrefix}/create`, {
-    data
-  });
+  return http.post<SongResult>(`${songPrefix}/create`, { data });
 };
 
 /** 删除歌曲信息 */
 export const deleteSong = (id: number) => {
-  return http.post<boolean>(`${songPrefix}/delete`, {
-    params: { id }
-  });
+  return http.post<boolean>(`${songPrefix}/delete`, { params: { id } });
 };
 
 /** 批量创建歌曲信息，适用于上传解析生成的批量模板 */
 export const batchCreateSongs = (data: Array<SongCreate>) => {
-  return http.post<SongResult>(`${songPrefix}/batchCreate`, {
-    data
-  });
+  return http.post<SongResult>(`${songPrefix}/batchCreate`, { data });
 };
 
 /** 根据专辑id分页查询关联歌曲信息 */
 export const getAlbumRelatedSongLists = (data: RelatedAlbumSongParam) => {
-  return http.post<SongResultList>(`${songPrefix}/pageByAlbumId`, {
-    data
-  });
+  return http.post<SongResultList>(`${songPrefix}/pageByAlbumId`, { data });
 };
 
 /** 根据歌手id分页查询关联歌曲信息 */
 export const getSingerRelatedSongLists = (data: RelatedSingerSongParam) => {
-  return http.post<SongResultList>(`${songPrefix}/pageSingerId`, {
-    data
-  });
+  return http.post<SongResultList>(`${songPrefix}/pageSingerId`, { data });
 };
 
 /** 解除专辑与歌曲关联 */
 export const disassociation_album_song = (data: DISASSOCIATIONAlbumParam) => {
-  return http.post<boolean>(`${songPrefix}/shelveAlbumId`, {
-    data
-  });
+  return http.post<boolean>(`${songPrefix}/shelveAlbumId`, { data });
 };
 
 /** 解除歌手与歌曲关联 */
 export const disassociation_singer_song = (data: DISASSOCIATIONSingerParam) => {
-  return http.post<boolean>(`${songPrefix}/shelveSingerId`, {
-    data
-  });
+  return http.post<boolean>(`${songPrefix}/shelveSingerId`, { data });
 };
 
 /** 获取阿里云OSS-STSToken，用户客户端文件直传OSS */
 export const getSTSToken = () => {
   return http.get<OSSConfig>(`${songPrefix}/getSTS`);
+};
+
+/** 根据OSS链接与文件名解析歌曲信息 */
+export const getOSSAnalysisResult = (data: OSSCreate) => {
+  return http.post<SongCreate>(`${songPrefix}/uploadByOSS`, { data });
 };
