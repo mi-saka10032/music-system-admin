@@ -11,6 +11,7 @@ import { shallowRef, ref, computed, watch } from "vue";
 import {
   UPLOAD_URL,
   HEADERS,
+  MULTIPLE_SIZE,
   MAX_SIZE_TEXT,
   ACCEPT,
   LIMIT_COUNT,
@@ -111,16 +112,26 @@ async function batchUploadOSS(item: UploadRequestOptions) {
     // 1. 根据{时间戳-原始文件名}生成唯一的文件名
     const filename = `${Date.now()}-${originalName}`;
     try {
-      // 2.分片上传
-      const result = await client.value.multipartUpload(
-        `/music/${filename}`,
-        item.file
-      );
-      // 3.根据结果name获取签名url（真正的可下载链接）
+      let result: any;
       let downloadUrl = "";
-      if (result.name && result?.res.status === 200) {
-        downloadUrl = downloadPrefix.value + result.name;
+      if (item.file.size >= MULTIPLE_SIZE) {
+        // 1.大文件分片上传
+        result = await client.value.multipartUpload(
+          `/music/${filename}`,
+          item.file
+        );
+        // 3.根据结果name获取签名url（真正的可下载链接）
+        if (result.name && result?.res.status === 200) {
+          downloadUrl = downloadPrefix.value + result.name;
+        }
+      } else {
+        // 2.小文件普通上传
+        result = await client.value.put(`/music/${filename}`, item.file);
+        if (result.name && result?.res.status === 200) {
+          downloadUrl = result.url;
+        }
       }
+      console.log(downloadUrl);
       if (downloadUrl.length > 0) {
         // 生成的OSS链接有效，推入ossData等待统一上传调用分析接口
         ossData.value.push({
