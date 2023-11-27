@@ -1,8 +1,14 @@
-import { onMounted, ref, shallowRef } from "vue";
+import { type Ref, type ShallowRef, onMounted, ref, shallowRef } from "vue";
+import OSS from "ali-oss";
 import { getSTSToken } from "@/api/song";
 
-export function useOSS() {
-  const client = shallowRef(null);
+interface UseOSS {
+  client: ShallowRef<InstanceType<typeof OSS>>;
+  downloadPrefix: Ref<String>;
+}
+
+export function useOSS(): UseOSS {
+  const client = shallowRef<InstanceType<typeof OSS>>(null);
 
   const downloadPrefix = ref("");
 
@@ -10,7 +16,7 @@ export function useOSS() {
   onMounted(async () => {
     const data = await getSTSToken();
     downloadPrefix.value = data.region;
-    client.value = new window.OSS({
+    client.value = new OSS({
       region: "oss-cn-chengdu",
       accessKeyId: data.accessKeyId,
       accessKeySecret: data.accessKeySecret,
