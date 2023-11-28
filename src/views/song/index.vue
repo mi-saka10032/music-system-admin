@@ -67,40 +67,6 @@ const songQueryParam = computed<SongParam>(() => ({
 
 /** 歌曲表格配置 */
 tableColumns.value = useMusicStoreHook().songTableColumns;
-
-/** 查询歌曲列表 */
-async function getLists(): Promise<void> {
-  openLoading();
-  try {
-    const data = await getSongLists(songQueryParam.value);
-    const list = data.list;
-    tableData.value = list;
-    pagination.total = data.total;
-  } catch (error: any) {
-    console.log(error);
-  }
-  closeLoading();
-}
-
-/** 新增表单 */
-const { createFormColumns, createDialog, resetCreateForm } =
-  useCreateDialog(getLists);
-
-/** 编辑表单 */
-const { updateForm, updateFormColumns, editDialog, resetUpdateForm } =
-  useUpdateDialog(getLists);
-
-/** 批量模板新增表单 */
-const {
-  batchTemplates,
-  songProgress,
-  batchTemplateSongsDialog,
-  progressDialog,
-  childrenLength
-} = useBatchTemplateDialog(getLists);
-
-const { deleteSuccessMsg, deleteNoCheckedMsg } = useDelete();
-
 /** singer的全量筛选项 挂载时触发 */
 async function querySingerLists(): Promise<void> {
   const param = { pageNo: 1, pageSize: 1000 };
@@ -144,6 +110,45 @@ async function queryAlbumLists(): Promise<void> {
     }
   }
 }
+
+/** 查询歌曲列表 */
+async function getLists(): Promise<void> {
+  openLoading();
+  try {
+    const data = await getSongLists(songQueryParam.value);
+    const list = data.list;
+    tableData.value = list;
+    pagination.total = data.total;
+  } catch (error: any) {
+    console.log(error);
+  }
+  closeLoading();
+}
+
+function batchGetLists() {
+  getLists();
+  querySingerLists();
+  queryAlbumLists();
+}
+
+/** 新增表单 */
+const { createFormColumns, createDialog, resetCreateForm } =
+  useCreateDialog(getLists);
+
+/** 编辑表单 */
+const { updateForm, updateFormColumns, editDialog, resetUpdateForm } =
+  useUpdateDialog(getLists);
+
+/** 批量模板新增表单 */
+const {
+  batchTemplates,
+  songProgress,
+  batchTemplateSongsDialog,
+  progressDialog,
+  childrenLength
+} = useBatchTemplateDialog(batchGetLists);
+
+const { deleteSuccessMsg, deleteNoCheckedMsg } = useDelete();
 
 /** 重置查询歌曲列表 */
 function resetLists(): void {
@@ -237,9 +242,7 @@ function updateSongProgress(result: string) {
 useWebsocket();
 
 onMounted(() => {
-  getLists();
-  querySingerLists();
-  queryAlbumLists();
+  batchGetLists();
   emitter.on("websocketMessage", updateSongProgress);
 });
 

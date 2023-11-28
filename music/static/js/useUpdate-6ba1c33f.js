@@ -1,0 +1,1 @@
+import{D as c,Y as t,ax as u}from"./index-17a497b2.js";import{r as m}from"./resetForm-657498b8.js";function F(s,o){const r=c(s),e=t(s),a=t(o);return{updateForm:e,updateFormColumns:a,resetUpdateForm:()=>m(e,r),updateSuccessMsg:()=>u("修改成功",{type:"success"})}}export{F as u};

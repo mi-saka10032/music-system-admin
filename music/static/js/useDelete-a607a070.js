@@ -1,1 +1,0 @@
-import{D as u,Y as t,ax as o}from"./index-5e9e0e40.js";import{r as a}from"./resetForm-347df3d1.js";function l(e,s){const c=u(e),r=t(e),n=t(s);return{queryForm:r,queryFormColumns:n,resetQueryForm:()=>a(r,c)}}function y(){return{deleteSuccessMsg:()=>o("删除成功",{type:"success"}),deleteNoCheckedMsg:()=>o("当前无选中项",{type:"error"})}}export{y as a,l as u};
