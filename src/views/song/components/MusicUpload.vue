@@ -27,7 +27,7 @@ import {
   getOSSAnalysisResult
 } from "@/api/song";
 import { useOSS } from "@/hooks/useOSS";
-import type OSS from "ali-oss";
+import OSS from "./oss";
 import { type UploadRequestOptions } from "element-plus";
 
 defineOptions({

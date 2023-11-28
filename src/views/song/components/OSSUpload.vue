@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useOSS } from "@/hooks/useOSS";
-import type OSS from "ali-oss";
+import OSS from "./oss";
 import { MAX_SIZE_TEXT, uploadSizeJudge } from "./uploadConstant";
 import { type UploadRequestOptions } from "element-plus";
 import { message } from "@/utils/message";
