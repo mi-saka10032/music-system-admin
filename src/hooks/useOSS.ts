@@ -1,8 +1,14 @@
-import { onMounted, ref, shallowRef } from "vue";
+import { type Ref, type ShallowRef, onMounted, ref, shallowRef } from "vue";
+import OSS from "@/views/song/components/oss";
 import { getSTSToken } from "@/api/song";
 
-export function useOSS() {
-  const client = shallowRef(null);
+interface UseOSS {
+  client: ShallowRef<InstanceType<typeof OSS>>;
+  downloadPrefix: Ref<String>;
+}
+
+export function useOSS(): UseOSS {
+  const client = shallowRef<InstanceType<typeof OSS>>(null);
 
   const downloadPrefix = ref("");
 
