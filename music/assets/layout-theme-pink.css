@@ -895,9 +895,9 @@
 .layout-theme-pink body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-pink .meteors {
-  background-color: #28081a;
-}
 .layout-theme-pink .sidebar-logo-container .sidebar-logo-link .sidebar-title {
   color: #fff;
+}
+.layout-theme-pink .meteors {
+  background-color: #28081a;
 }

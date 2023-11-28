@@ -922,12 +922,12 @@
 .layout-theme-default body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-default .meteors {
-  background-color: #001529;
-}
 .layout-theme-default
   .sidebar-logo-container
   .sidebar-logo-link
   .sidebar-title {
   color: #fff;
+}
+.layout-theme-default .meteors {
+  background-color: #001529;
 }

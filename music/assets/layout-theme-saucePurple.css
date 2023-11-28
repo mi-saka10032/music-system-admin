@@ -964,12 +964,12 @@
 .layout-theme-saucePurple body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-saucePurple .meteors {
-  background-color: #130824;
-}
 .layout-theme-saucePurple
   .sidebar-logo-container
   .sidebar-logo-link
   .sidebar-title {
   color: #fff;
+}
+.layout-theme-saucePurple .meteors {
+  background-color: #130824;
 }

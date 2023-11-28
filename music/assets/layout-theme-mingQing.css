@@ -931,12 +931,12 @@
 .layout-theme-mingQing body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-mingQing .meteors {
-  background-color: #032121;
-}
 .layout-theme-mingQing
   .sidebar-logo-container
   .sidebar-logo-link
   .sidebar-title {
   color: #fff;
+}
+.layout-theme-mingQing .meteors {
+  background-color: #032121;
 }

@@ -964,12 +964,12 @@
 .layout-theme-auroraGreen body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-auroraGreen .meteors {
-  background-color: #0b1e15;
-}
 .layout-theme-auroraGreen
   .sidebar-logo-container
   .sidebar-logo-link
   .sidebar-title {
   color: #fff;
+}
+.layout-theme-auroraGreen .meteors {
+  background-color: #0b1e15;
 }

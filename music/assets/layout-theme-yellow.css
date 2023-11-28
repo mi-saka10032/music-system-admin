@@ -901,9 +901,9 @@
 .layout-theme-yellow body[layout="mix"] .horizontal-header .is-active {
   color: #d25f00 !important;
 }
-.layout-theme-yellow .meteors {
-  background-color: #2b2503;
-}
 .layout-theme-yellow .sidebar-logo-container .sidebar-logo-link .sidebar-title {
   color: #d25f00;
+}
+.layout-theme-yellow .meteors {
+  background-color: #2b2503;
 }

@@ -922,12 +922,12 @@
 .layout-theme-volcano body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-volcano .meteors {
-  background-color: #2b0e05;
-}
 .layout-theme-volcano
   .sidebar-logo-container
   .sidebar-logo-link
   .sidebar-title {
   color: #fff;
+}
+.layout-theme-volcano .meteors {
+  background-color: #2b0e05;
 }

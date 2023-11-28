@@ -895,9 +895,9 @@
 .layout-theme-dusk body[layout="mix"] .horizontal-header .is-active {
   color: #fff !important;
 }
-.layout-theme-dusk .meteors {
-  background-color: #2a0608;
-}
 .layout-theme-dusk .sidebar-logo-container .sidebar-logo-link .sidebar-title {
   color: #fff;
+}
+.layout-theme-dusk .meteors {
+  background-color: #2a0608;
 }
