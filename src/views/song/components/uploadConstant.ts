@@ -8,6 +8,7 @@ export const UPLOAD_URL = "/api/song/upload";
 export const HEADERS = {
   Authorization: formatToken(getToken()?.accessToken || "")
 };
+export const MULTIPLE_SIZE = 100 * 1024 * 1024;
 export const MAX_SIZE = 256 * 1024 * 1024;
 export const MAX_SIZE_TEXT = "256MB";
 export const ACCEPT = ".mp3, .flac";

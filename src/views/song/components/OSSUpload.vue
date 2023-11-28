@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useOSSStoreHook } from "@/store/modules/oss";
+import { useOSS } from "@/hooks/useOSS";
+import OSS from "./oss";
 import { MAX_SIZE_TEXT, uploadSizeJudge } from "./uploadConstant";
 import { type UploadRequestOptions } from "element-plus";
 import { message } from "@/utils/message";
@@ -26,8 +27,7 @@ const localValue = computed({
 });
 
 /** 阿里云OSS实例 url前缀 */
-const client = useOSSStoreHook().client;
-const prefix = useOSSStoreHook().prefix;
+const { client, downloadPrefix } = useOSS();
 
 /** 阿里云OSS文件上传进度百分比 */
 const ossProgress = ref(0);
@@ -59,24 +59,21 @@ const multi_accept = [
 
 /** 上传阿里云OSS函数 */
 async function uploadOSS(item: UploadRequestOptions) {
-  if (client !== null) {
+  if (client.value != null) {
     ossLoading.value = true;
     // 1. 根据{时间戳-原始文件名}生成唯一的文件名
     const filename = `${Date.now()}-${item.file.name}`;
     try {
       // 2.分片上传
-      const result = await client.multipartUpload(
-        `/music/${filename}`,
-        item.file,
-        {
+      const result: OSS.MultipartUploadResult =
+        await client.value.multipartUpload(`/music/${filename}`, item.file, {
           // 呈递上传进度
           progress: (p: number) =>
             (ossProgress.value = Number((p * 100).toFixed(0)))
-        }
-      );
+        });
       // 3.根据结果name获取签名url（真正的可下载链接）
       if (result.name && result?.res.status === 200) {
-        const downloadUrl = prefix + result.name;
+        const downloadUrl = downloadPrefix.value + result.name;
         // 呈递OSS链接
         localValue.value = downloadUrl;
       }

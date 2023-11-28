@@ -84,7 +84,7 @@ export function useBatchTemplateDialog(sureCallback: Function) {
               isFlex={false}
             >
               {{
-                ossUpload: () => <OSSUpload v-model:value={item.musicUrl} />,
+                ossUpload: () => <OSSUpload v-model={item.musicUrl} />,
                 embedAlbum: () => (
                   <SimpleForm
                     class="embed_album w-full"

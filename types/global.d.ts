@@ -7,6 +7,7 @@ import type {
 import type { ECharts } from "echarts";
 import type { IconifyIcon } from "@iconify/vue";
 import type { TableColumns } from "@pureadmin/table";
+import OSS from "@/views/song/components/oss";
 
 /**
  * 全局类型声明，无需引入直接在 `.vue` 、`.ts` 、`.tsx` 文件使用即可获得类型提示
@@ -39,7 +40,7 @@ declare global {
     mozRequestAnimationFrame: (callback: FrameRequestCallback) => number;
     oRequestAnimationFrame: (callback: FrameRequestCallback) => number;
     msRequestAnimationFrame: (callback: FrameRequestCallback) => number;
-    OSS: any;
+    OSS: typeof OSS;
   }
 
   /**
