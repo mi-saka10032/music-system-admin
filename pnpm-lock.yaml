@@ -41,9 +41,6 @@ dependencies:
   mitt:
     specifier: ^3.0.0
     version: 3.0.0
-  mockjs:
-    specifier: 1.1.0
-    version: 1.1.0
   nprogress:
     specifier: ^0.2.0
     version: 0.2.0
@@ -106,9 +103,6 @@ devDependencies:
   "@types/js-cookie":
     specifier: ^3.0.3
     version: 3.0.3
-  "@types/mockjs":
-    specifier: 1.0.10
-    version: 1.0.10
   "@types/node":
     specifier: ^20.3.1
     version: 20.3.1
@@ -3207,6 +3201,7 @@ packages:
         integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==
       }
     engines: { node: ">=16" }
+    dev: true
 
   /commander@2.20.3:
     resolution:
@@ -6095,6 +6090,7 @@ packages:
     hasBin: true
     dependencies:
       commander: 11.0.0
+    dev: true
 
   /mri@1.2.0:
     resolution:
